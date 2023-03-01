@@ -1,0 +1,28 @@
+{
+  "name": "demo-cards-against-humanity",
+  "version": "1.0.0",
+  "description": "Demo of the popular card game.",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodingNdStuff/demo-cards-against-humanity.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CodingNdStuff/demo-cards-against-humanity/issues"
+  },
+  "homepage": "https://github.com/CodingNdStuff/demo-cards-against-humanity#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "express-validator": "^6.15.0",
+    "http": "^0.0.1-security",
+    "passport": "^0.6.0"
+  }
+}

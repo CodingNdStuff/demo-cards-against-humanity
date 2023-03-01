@@ -1,0 +1,124 @@
+import 'package:cards_against_humanity/widgets/custom_layouts.dart';
+import 'package:cards_against_humanity/widgets/players_list.dart';
+import 'package:flutter/material.dart';
+
+class LobbyScreen extends StatefulWidget {
+  static const routeName = "/lobby";
+  const LobbyScreen({super.key});
+  static const _lobbyCode = "123981";
+
+  @override
+  State<LobbyScreen> createState() => _LobbyScreenState();
+}
+
+class _LobbyScreenState extends State<LobbyScreen> {
+  bool isReady = false;
+  Map<String, dynamic> _players = {
+    "player1": {
+      "score": 300,
+      "ready": false,
+    },
+    "player2": {
+      "score": 500,
+      "ready": false,
+    },
+    "player-123456789": {
+      "score": 900,
+      "ready": false,
+    },
+    "player-136789": {
+      "score": 200,
+      "ready": true,
+    },
+    "player3": {
+      "score": 500,
+      "ready": false,
+    },
+    "player-122456789": {
+      "score": 900,
+      "ready": false,
+    },
+  };
+  @override
+  Widget build(BuildContext context) {
+    return CustomLayouts.mainLayout([
+      const Text("Lobby code: ${LobbyScreen._lobbyCode}"),
+      const SizedBox(
+        height: 10,
+      ),
+      SizedBox(
+        height: MediaQuery.of(context).size.height * 0.5,
+        width: MediaQuery.of(context).size.width * 0.7,
+        child: GridView(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 2,
+            childAspectRatio: 4 / 2,
+          ),
+          children: [
+            ..._players.entries.map(
+              (e) => PlayerInLobbyListItem(
+                  playerName: e.key, ready: e.value["ready"]),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+      ElevatedButton(
+        onPressed: isReady ? null : _handleReady,
+        child: const Text("I'm ready!"),
+      ),
+    ], context);
+  }
+
+  void _handleReady() {
+    setState(() {
+      isReady = true;
+      _players.update(
+          "player1",
+          (value) => {
+                "score": 300,
+                "ready": true,
+              });
+    });
+  }
+}
+
+class PlayerInLobbyListItem extends StatelessWidget {
+  const PlayerInLobbyListItem(
+      {super.key, required this.playerName, required this.ready});
+  final String playerName;
+  final bool ready;
+  final avatar = const Icon(Icons.person);
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: CircleAvatar(
+        child: avatar,
+      ),
+      title: FittedBox(
+        alignment: Alignment.centerLeft,
+        fit: BoxFit.scaleDown,
+        child: Text(
+          playerName,
+        ),
+      ),
+      textColor: Colors.black,
+      subtitle: ready
+          ? Text(
+              "Ready",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            )
+          : Text(
+              "Not ready",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+    );
+  }
+}
