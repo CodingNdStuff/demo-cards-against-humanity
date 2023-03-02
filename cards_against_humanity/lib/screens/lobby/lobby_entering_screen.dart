@@ -41,7 +41,8 @@ class _LobbyEnteringScreenState extends State<LobbyEnteringScreen> {
   }
 
   void _handleEnterLobby() {
-    Navigator.of(context)
-        .pushNamedAndRemoveUntil(LobbyScreen.routeName, ((route) => false));
+    Navigator.of(context).pushNamedAndRemoveUntil(
+        LobbyScreen.routeName, ((route) => false),
+        arguments: _lobbyCode.text);
   }
 }

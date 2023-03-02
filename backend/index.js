@@ -56,9 +56,13 @@ if(req.isAuthenticated()) {
 // addFormats(validator.ajv);
 // var validate = validator.validate;
 
-
+//routers
+app.use(express.json());
+const lobbyController=require("./controller/lobby_controller");
+app.use("/api",lobbyController);
 
 // Creating the session
+
 
 app.use(cors(corsOptions));
 app.use(session({

@@ -23,6 +23,7 @@
     "express-session": "^1.17.3",
     "express-validator": "^6.15.0",
     "http": "^0.0.1-security",
+    "mqtt": "^4.3.7",
     "passport": "^0.6.0"
   }
 }

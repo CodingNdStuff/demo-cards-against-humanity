@@ -1,6 +1,8 @@
+import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
+import 'package:cards_against_humanity/models/lobby.dart';
 import 'package:cards_against_humanity/widgets/custom_layouts.dart';
-import 'package:cards_against_humanity/widgets/players_list.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LobbyScreen extends StatefulWidget {
   static const routeName = "/lobby";
@@ -13,7 +15,9 @@ class LobbyScreen extends StatefulWidget {
 
 class _LobbyScreenState extends State<LobbyScreen> {
   bool isReady = false;
-  Map<String, dynamic> _players = {
+  bool _isInitialized = false;
+  Lobby? lobbyData;
+  final Map<String, dynamic> _players = {
     "player1": {
       "score": 300,
       "ready": false,
@@ -39,10 +43,26 @@ class _LobbyScreenState extends State<LobbyScreen> {
       "ready": false,
     },
   };
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      Provider.of<MqttClientWrapper>(context).connect("4jjjnpe6");
+
+      _isInitialized = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    String lobbyId = ModalRoute.of(context)?.settings.arguments as String;
+
+    lobbyData = Provider.of<MqttClientWrapper>(context).lobby;
+    print(lobbyData?.players[0].nickname);
     return CustomLayouts.mainLayout([
-      const Text("Lobby code: ${LobbyScreen._lobbyCode}"),
+      Text("Lobby code: ${lobbyData?.id}"),
+      Text("duration: ${lobbyData?.roundDuration}"),
       const SizedBox(
         height: 10,
       ),
@@ -56,9 +76,9 @@ class _LobbyScreenState extends State<LobbyScreen> {
             childAspectRatio: 4 / 2,
           ),
           children: [
-            ..._players.entries.map(
+            ...?lobbyData?.players.map(
               (e) => PlayerInLobbyListItem(
-                  playerName: e.key, ready: e.value["ready"]),
+                  playerName: e.nickname, ready: e.isReady),
             ),
           ],
         ),
