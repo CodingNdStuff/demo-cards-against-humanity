@@ -78,6 +78,7 @@ exports.setPlayerReady=function(lobbyId, playerId){
 }
 
 exports.joinLobby=function(lobbyId, playerId, nickname){
+    console.log(lobbies.get(lobbyId))
     if(lobbies.get(lobbyId)==undefined) return;
     lobbies.get(lobbyId).players.push({
         "id": playerId,
@@ -85,7 +86,8 @@ exports.joinLobby=function(lobbyId, playerId, nickname){
         "ready":false,
     });
     client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId)), {retain:true});
-    // lobbies.set(lobbyId)
+    console.log("added "+nickname);
+    console.log(lobbies.get(lobbyId))
 }
 
 const _generateUniqueId = function (list) {

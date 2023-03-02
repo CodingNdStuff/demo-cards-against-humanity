@@ -1,3 +1,4 @@
+import 'package:cards_against_humanity/helpers/http_helper.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_screen.dart';
 import 'package:cards_against_humanity/widgets/custom_layouts.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,7 @@ class _LobbyEnteringScreenState extends State<LobbyEnteringScreen> {
   }
 
   void _handleEnterLobby() {
+    API.enterLobby(_lobbyCode.text, "asdwads", "miao");
     Navigator.of(context).pushNamedAndRemoveUntil(
         LobbyScreen.routeName, ((route) => false),
         arguments: _lobbyCode.text);

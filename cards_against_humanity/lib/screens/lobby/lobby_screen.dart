@@ -1,3 +1,4 @@
+import 'package:cards_against_humanity/helpers/http_helper.dart';
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/models/lobby.dart';
 import 'package:cards_against_humanity/widgets/custom_layouts.dart';
@@ -7,7 +8,6 @@ import 'package:provider/provider.dart';
 class LobbyScreen extends StatefulWidget {
   static const routeName = "/lobby";
   const LobbyScreen({super.key});
-  static const _lobbyCode = "123981";
 
   @override
   State<LobbyScreen> createState() => _LobbyScreenState();
@@ -59,7 +59,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
     String lobbyId = ModalRoute.of(context)?.settings.arguments as String;
 
     lobbyData = Provider.of<MqttClientWrapper>(context).lobby;
-    print(lobbyData?.players[0].nickname);
     return CustomLayouts.mainLayout([
       Text("Lobby code: ${lobbyData?.id}"),
       Text("duration: ${lobbyData?.roundDuration}"),
@@ -87,21 +86,16 @@ class _LobbyScreenState extends State<LobbyScreen> {
         height: 10,
       ),
       ElevatedButton(
-        onPressed: isReady ? null : _handleReady,
+        onPressed: isReady ? null : () => _handleReady(lobbyId, "asdwads"),
         child: const Text("I'm ready!"),
       ),
     ], context);
   }
 
-  void _handleReady() {
+  void _handleReady(String lobbyId, playerId) {
     setState(() {
       isReady = true;
-      _players.update(
-          "player1",
-          (value) => {
-                "score": 300,
-                "ready": true,
-              });
+      API.setPlayerReady(lobbyId, playerId);
     });
   }
 }

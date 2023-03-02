@@ -43,7 +43,7 @@ router.post('/joinLobby/:lobbyId', async (req, res) => {
     const lobbyId= req.params.lobbyId;
     const playerId= req.body.playerId;
     const nickname= req.body.nickname;
-
+    console.log(lobbyId)
     mqtt.joinLobby(lobbyId, playerId, nickname);
     return res.status(201).json(lobbyId);
 });
