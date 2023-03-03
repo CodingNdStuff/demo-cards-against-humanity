@@ -24,7 +24,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
     super.didChangeDependencies();
     if (!_isInitialized) {
       String lobbyId = ModalRoute.of(context)?.settings.arguments as String;
-      Provider.of<MqttClientWrapper>(context).connect(lobbyId);
+      final playerId = Provider.of<User>(context, listen: false).playerData.id;
+      Provider.of<MqttClientWrapper>(context).connect(lobbyId, playerId);
       _isInitialized = true;
     }
   }

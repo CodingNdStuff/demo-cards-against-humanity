@@ -1,3 +1,4 @@
+import 'package:cards_against_humanity/exceptions/connection_exception.dart';
 import 'package:cards_against_humanity/helpers/http_helper.dart';
 import 'package:cards_against_humanity/models/user.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_screen.dart';
@@ -74,13 +75,12 @@ class _LobbyEnteringScreenState extends State<LobbyEnteringScreen> {
             LobbyScreen.routeName, ((route) => false),
             arguments: _lobbyCode.text);
       });
-    } catch (e) {
+    } on Failure catch (e) {
       print(e);
       showDialog(
         context: context,
-        builder: (context) => const ErrorDialog(
-            title: "Connection error",
-            content: "Looks like the server is not online."),
+        builder: (context) =>
+            ErrorDialog(title: "Connection error", content: e.message),
       ).then((value) => setState(() {
             _isLoading = false;
           }));

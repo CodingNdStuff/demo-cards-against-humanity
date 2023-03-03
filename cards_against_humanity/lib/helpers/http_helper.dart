@@ -1,8 +1,10 @@
 // ignore_for_file: curly_braces_in_flow_control_structures
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cards_against_humanity/exceptions/connection_exception.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
@@ -19,18 +21,20 @@ abstract class API {
       "nickname": nickname,
     });
     try {
-      final response = await http
-          .post(
-            url,
-            headers: {"Content-Type": "application/json"},
-            body: body,
-          )
-          .timeout(const Duration(seconds: 5));
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: body,
+      );
+      // .timeout(const Duration(seconds: 5));
       if (response.statusCode == 201) return true;
-      return false;
-    } catch (e) {
-      debugPrint("Error in API.enterLobby: $e");
-      throw HttpException("Error in API.enterLobby: $e");
+      throw Failure(code: 2, message: "Specified lobby does not exsists.");
+    } on HttpException {
+      throw Failure(code: 1, message: "Looks like the service is unavailable.");
+    } on TimeoutException {
+      throw Failure(code: 1, message: "Server might be offline.");
+    } on SocketException {
+      throw Failure(code: 1, message: "Server might be offline.");
     }
   }
 
@@ -46,10 +50,14 @@ abstract class API {
           )
           .timeout(const Duration(seconds: 5));
       if (response.statusCode == 201) return true;
-      return false;
-    } catch (e) {
-      debugPrint("Error in API.setPlayerReady: $e");
-      throw HttpException("Error in API.setPlayerReady: $e");
+      throw Failure(
+          code: 2, message: "Specified lobby/player does not exsists.");
+    } on HttpException {
+      throw Failure(code: 1, message: "Looks like the service is unavailable.");
+    } on TimeoutException {
+      throw Failure(code: 1, message: "Server might be offline.");
+    } on SocketException {
+      throw Failure(code: 1, message: "Server might be offline.");
     }
   }
 
@@ -76,10 +84,13 @@ abstract class API {
           .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 201) return json.decode(response.body);
-      return "";
-    } catch (e) {
-      debugPrint("Error in API.createLobby: $e");
-      throw HttpException("Error in API.createLobby: $e");
+      throw Failure(code: 2, message: "Bad request error.");
+    } on HttpException {
+      throw Failure(code: 1, message: "Looks like the service is unavailable.");
+    } on TimeoutException {
+      throw Failure(code: 1, message: "Server might be offline.");
+    } on SocketException {
+      throw Failure(code: 1, message: "Server might be offline.");
     }
   }
 }

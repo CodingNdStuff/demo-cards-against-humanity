@@ -10,7 +10,7 @@ var options = {
     reconnectPeriod: 1000,
     connectTimeout: 30 * 1000,
     will: {
-        topic: 'WillMsg',
+        topic: 'willTopic',
         payload: 'Server Connection Closed abnormally..!',
         qos: 0,
         retain: false
@@ -40,11 +40,22 @@ client.on('close', function () {
     console.log(clientId + ' server disconnected');
 })
 
+client.on('message', (topic, message) => {
+    const playerId = JSON.parse(message);
+    _updateLobbyAfterDisconnect(playerId);  
+});
+
+//
+client.subscribe("willTopic");
+//
+
 exports.createLobby = function (id, nickname, roundDuration, maxRoundNumber) {
+    if (client.disconnected) throw 500;
     // const newLobbyId = _generateUniqueId(lobbies)
+
     const newLobbyId = "4jjjnpe6"
     const newLobby = {
-        "open" : true,
+        "open": true,
         "roundDuration": roundDuration,
         "maxRoundNumber": maxRoundNumber,
         "currentRound": 0,
@@ -53,41 +64,38 @@ exports.createLobby = function (id, nickname, roundDuration, maxRoundNumber) {
             {
                 "id": id,
                 "nickname": nickname,
-                "ready":false,
+                "ready": false,
             },
         ],
     }
-    lobbies.set(newLobbyId , newLobby );
-    console.log(lobbies.get("4jjjnpe6"))
-    client.publish(newLobbyId, JSON.stringify(lobbies.get(newLobbyId)), {retain:true});
+    lobbies.set(newLobbyId, newLobby);
+    client.publish(newLobbyId, JSON.stringify(lobbies.get(newLobbyId)), { retain: true });
     return newLobbyId;
 }
-exports.setPlayerReady=function(lobbyId, playerId){
-    found=false;
-    if(lobbies.get(lobbyId)==undefined) return;
+exports.setPlayerReady = function (lobbyId, playerId) {
+    if (client.disconnected) throw 500;
+    if (lobbies.get(lobbyId) == undefined) throw 404;
+    found = false;
     lobbies.get(lobbyId).players.forEach(element => {
-        if(found) return;
-        if(element.id==playerId){
-            element.ready=true;
-            found=true;
+        if (found) return;
+        if (element.id == playerId) {
+            element.ready = true;
+            found = true;
         }
     });
-    if(!found) return;
-    client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId)), {retain:true});
-    // lobbies.set(lobbyId)
+    if (!found) throw 404;
+    client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId)), { retain: true });
 }
 
-exports.joinLobby=function(lobbyId, playerId, nickname){
-    console.log(lobbies.get(lobbyId))
-    if(lobbies.get(lobbyId)==undefined) return;
+exports.joinLobby = function (lobbyId, playerId, nickname) {
+    if (client.disconnected) throw 500;
+    if (lobbies.get(lobbyId) == undefined) throw 404;
     lobbies.get(lobbyId).players.push({
         "id": playerId,
         "nickname": nickname,
-        "ready":false,
+        "ready": false,
     });
-    client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId)), {retain:true});
-    console.log("added "+nickname);
-    console.log(lobbies.get(lobbyId))
+    client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId)), { retain: true });
 }
 
 const _generateUniqueId = function (list) {
@@ -101,4 +109,18 @@ const _generateUniqueId = function (list) {
     } while (list.some(item => item.id === newId));
 
     return newId;
+}
+
+const _updateLobbyAfterDisconnect = function (playerId) {
+    for (let [lobbyId, lobby] of lobbies) {
+        let playerIndex = lobby.players.findIndex(player => player.id === playerId);
+        if (playerIndex !== -1) {
+            lobby.players.splice(playerIndex, 1);
+            if (lobby.players.length === 0) {
+                lobbies.delete(lobbyId);
+            }
+            client.publish(lobbyId, "", { retain: false });
+            return lobbyId;
+        }
+    }
 }
