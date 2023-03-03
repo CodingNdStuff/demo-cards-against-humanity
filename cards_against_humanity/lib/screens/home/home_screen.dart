@@ -1,9 +1,9 @@
-import 'dart:math';
-
+import 'package:cards_against_humanity/models/user.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_creation_screen.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_entering_screen.dart';
 import 'package:cards_against_humanity/widgets/custom_layouts.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   static const routeName = "/home";
@@ -14,18 +14,18 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String nickName = Random().toString();
-  final _nickNameController = TextEditingController(
-      text: "player-${Random().nextInt(100000).toString()}");
+  final _nicknameController = TextEditingController();
 
   @override
   void dispose() {
     super.dispose();
-    _nickNameController.dispose();
+    _nicknameController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<User>(context, listen: false);
+    _nicknameController.text = user.playerData.nickname;
     return CustomLayouts.mainLayout([
       Text(
         "Cards \nAgainst \nHumanity",
@@ -43,7 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
             hintText: "Username",
             counterText: "",
           ),
-          controller: _nickNameController,
+          controller: _nicknameController,
+          onChanged: (value) => user.changeNickname(value),
         ),
       ),
       const SizedBox(

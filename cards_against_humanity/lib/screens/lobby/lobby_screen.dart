@@ -1,6 +1,7 @@
 import 'package:cards_against_humanity/helpers/http_helper.dart';
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/models/lobby.dart';
+import 'package:cards_against_humanity/models/user.dart';
 import 'package:cards_against_humanity/widgets/custom_layouts.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,47 +18,19 @@ class _LobbyScreenState extends State<LobbyScreen> {
   bool isReady = false;
   bool _isInitialized = false;
   Lobby? lobbyData;
-  final Map<String, dynamic> _players = {
-    "player1": {
-      "score": 300,
-      "ready": false,
-    },
-    "player2": {
-      "score": 500,
-      "ready": false,
-    },
-    "player-123456789": {
-      "score": 900,
-      "ready": false,
-    },
-    "player-136789": {
-      "score": 200,
-      "ready": true,
-    },
-    "player3": {
-      "score": 500,
-      "ready": false,
-    },
-    "player-122456789": {
-      "score": 900,
-      "ready": false,
-    },
-  };
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
-      Provider.of<MqttClientWrapper>(context).connect("4jjjnpe6");
-
+      String lobbyId = ModalRoute.of(context)?.settings.arguments as String;
+      Provider.of<MqttClientWrapper>(context).connect(lobbyId);
       _isInitialized = true;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    String lobbyId = ModalRoute.of(context)?.settings.arguments as String;
-
     lobbyData = Provider.of<MqttClientWrapper>(context).lobby;
     return CustomLayouts.mainLayout([
       Text("Lobby code: ${lobbyData?.id}"),
@@ -86,16 +59,19 @@ class _LobbyScreenState extends State<LobbyScreen> {
         height: 10,
       ),
       ElevatedButton(
-        onPressed: isReady ? null : () => _handleReady(lobbyId, "asdwads"),
+        onPressed: isReady ? null : () => _handleReady(lobbyData?.id ?? ""),
         child: const Text("I'm ready!"),
       ),
     ], context);
   }
 
-  void _handleReady(String lobbyId, playerId) {
-    setState(() {
-      isReady = true;
-      API.setPlayerReady(lobbyId, playerId);
+  void _handleReady(String lobbyId) async {
+    final playerData = Provider.of<User>(context, listen: false).playerData;
+    await API.setPlayerReady(lobbyId, playerData.id).then((success) {
+      if (!success) return;
+      setState(() {
+        isReady = true;
+      });
     });
   }
 }

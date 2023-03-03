@@ -1,5 +1,9 @@
+import 'dart:math';
+
 import 'package:cards_against_humanity/Themes/general_themes.dart';
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
+import 'package:cards_against_humanity/models/player.dart';
+import 'package:cards_against_humanity/models/user.dart';
 import 'package:cards_against_humanity/screens/home/home_screen.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_creation_screen.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_entering_screen.dart';
@@ -21,10 +25,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: ((context) => MqttClientWrapper()))
+        ChangeNotifierProvider(create: ((context) => MqttClientWrapper())),
+        ChangeNotifierProvider(
+            create: ((context) => User(
+                playerData: Player.basic(DateTime.now().toString(),
+                    "player-${Random().nextInt(100000)}")))),
       ],
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Cards Against Humanity',
         theme: AppThemes.themeData(context),
         routes: {
           HomeScreen.routeName: (ctx) => const HomeScreen(),
