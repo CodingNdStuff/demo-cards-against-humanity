@@ -3,9 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:cards_against_humanity/exceptions/connection_exception.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 abstract class API {
@@ -26,7 +24,6 @@ abstract class API {
         headers: {"Content-Type": "application/json"},
         body: body,
       );
-      print(response.statusCode);
       // .timeout(const Duration(seconds: 5));
       if (response.statusCode == 201) return true;
       throw Failure(code: 2, message: "Specified lobby does not exists.");
@@ -45,11 +42,9 @@ abstract class API {
   ) async {
     var url = Uri.http(domain, '/api/setPlayerReady/$lobbyId/$playerId');
     try {
-      final response = await http
-          .post(
-            url,
-          )
-          .timeout(const Duration(seconds: 5));
+      final response = await http.post(
+        url,
+      );
       if (response.statusCode == 201) return true;
       throw Failure(
           code: 2, message: "Specified lobby/player does not exists.");
@@ -76,13 +71,11 @@ abstract class API {
       "maxRoundNumber": maxRoundNumber
     });
     try {
-      final response = await http
-          .post(
-            url,
-            headers: {"Content-Type": "application/json"},
-            body: body,
-          )
-          .timeout(const Duration(seconds: 5));
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: body,
+      );
 
       if (response.statusCode == 201) return json.decode(response.body);
       throw Failure(code: 2, message: "Bad request error.");

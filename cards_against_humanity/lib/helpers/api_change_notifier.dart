@@ -5,8 +5,6 @@ import 'package:flutter/widgets.dart';
 enum NotifierState { initial, loading, loaded }
 
 class ApiChangeNotifier extends ChangeNotifier {
-  final _postService = API;
-
   NotifierState _state = NotifierState.initial;
   NotifierState get state => _state;
   void _setState(NotifierState state) {
