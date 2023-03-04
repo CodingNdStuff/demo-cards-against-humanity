@@ -82,7 +82,7 @@ router.post('/joinLobby/:lobbyId', [
         if (err == 404)
             return res.status(404).end();
     }
-
+    console.log("New user joined the lobby");
     return res.status(201).json(lobbyId);
 });
 

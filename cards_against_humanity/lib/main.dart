@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cards_against_humanity/Themes/general_themes.dart';
+import 'package:cards_against_humanity/helpers/api_change_notifier.dart';
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/models/player.dart';
 import 'package:cards_against_humanity/models/user.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
             create: ((context) => User(
                 playerData: Player.basic(DateTime.now().toString(),
                     "player-${Random().nextInt(100000)}")))),
+        ChangeNotifierProvider(create: ((context) => ApiChangeNotifier())),
       ],
       child: MaterialApp(
         title: 'Cards Against Humanity',

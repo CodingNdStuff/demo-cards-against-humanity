@@ -26,9 +26,10 @@ abstract class API {
         headers: {"Content-Type": "application/json"},
         body: body,
       );
+      print(response.statusCode);
       // .timeout(const Duration(seconds: 5));
       if (response.statusCode == 201) return true;
-      throw Failure(code: 2, message: "Specified lobby does not exsists.");
+      throw Failure(code: 2, message: "Specified lobby does not exists.");
     } on HttpException {
       throw Failure(code: 1, message: "Looks like the service is unavailable.");
     } on TimeoutException {
@@ -51,7 +52,7 @@ abstract class API {
           .timeout(const Duration(seconds: 5));
       if (response.statusCode == 201) return true;
       throw Failure(
-          code: 2, message: "Specified lobby/player does not exsists.");
+          code: 2, message: "Specified lobby/player does not exists.");
     } on HttpException {
       throw Failure(code: 1, message: "Looks like the service is unavailable.");
     } on TimeoutException {
