@@ -14,6 +14,10 @@ abstract class AppThemes {
               fontSize: 40,
               fontWeight: FontWeight.w900,
             ),
+            headline3: theme.textTheme.headline3?.copyWith(
+              fontSize: 40,
+              color: Colors.white,
+            ),
           ),
       inputDecorationTheme: theme.inputDecorationTheme.copyWith(
         border: const OutlineInputBorder(

@@ -6,6 +6,7 @@ import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/models/player.dart';
 import 'package:cards_against_humanity/models/user.dart';
 import 'package:cards_against_humanity/screens/home/home_screen.dart';
+import 'package:cards_against_humanity/screens/inGame/game_screen.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_creation_screen.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_entering_screen.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_screen.dart';
@@ -41,8 +42,10 @@ class MyApp extends StatelessWidget {
           LobbyCreationScreen.routeName: (ctx) => const LobbyCreationScreen(),
           LobbyEnteringScreen.routeName: (ctx) => const LobbyEnteringScreen(),
           LobbyScreen.routeName: (ctx) => const LobbyScreen(),
+          GameScreen.routeName: (ctx) => const GameScreen(),
         },
-        initialRoute: HomeScreen.routeName,
+        // initialRoute: HomeScreen.routeName,
+        initialRoute: GameScreen.routeName,
       ),
     );
   }

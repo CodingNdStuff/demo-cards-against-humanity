@@ -1,4 +1,4 @@
-import 'package:cards_against_humanity/widgets/players_list_item.dart';
+import 'package:cards_against_humanity/screens/inGame/players_list_item.dart';
 import 'package:flutter/material.dart';
 
 class PlayersList extends StatelessWidget {
@@ -9,6 +9,7 @@ class PlayersList extends StatelessWidget {
     return Container(
       color: Colors.grey[200],
       height: MediaQuery.of(context).size.height * 0.6,
+      width: MediaQuery.of(context).size.width * 0.3,
       child: SingleChildScrollView(
         child: Column(
           children: [
@@ -16,7 +17,9 @@ class PlayersList extends StatelessWidget {
                 .map((e) => SizedBox(
                       width: (MediaQuery.of(context).size.width) * 0.25,
                       child: PlayerListItem(
-                          playerName: e.key, playerScore: e.value["score"]),
+                        playerName: e.key,
+                        playerScore: e.value["score"],
+                      ),
                     ))
                 .toList(),
           ],
