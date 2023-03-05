@@ -43,7 +43,7 @@ client.on('close', function () {
 
 client.on('message', (topic, message) => {
     const playerId = JSON.parse(message);
-    _updateLobbyAfterDisconnect(playerId);  
+    _updateLobbyAfterDisconnect(playerId);
 });
 
 //
@@ -59,8 +59,6 @@ exports.createLobby = function (id, nickname, roundDuration, maxRoundNumber) {
         "open": true,
         "roundDuration": roundDuration,
         "maxRoundNumber": maxRoundNumber,
-        "currentRound": 0,
-        "currentBlackCard": null,
         "players": [
             {
                 "id": id,
@@ -68,12 +66,11 @@ exports.createLobby = function (id, nickname, roundDuration, maxRoundNumber) {
                 "ready": false,
             },
         ],
-
     }
     lobbies.set(newLobbyId, newLobby);
-    // 
-        // const blackCardsList= new CardsList();
-        cards.set(newLobbyId, new CardsList());
+
+    // const blackCardsList= new CardsList();
+    cards.set(newLobbyId, new CardsList());
     //
     client.publish(newLobbyId, JSON.stringify(lobbies.get(newLobbyId)), { retain: true });
     return newLobbyId;
@@ -91,6 +88,7 @@ exports.setPlayerReady = function (lobbyId, playerId) {
     });
     if (!found) throw 404;
     client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId)), { retain: true });
+    if (_checkAllReady(lobbyId)) _startGame(lobbyId);
 }
 
 exports.joinLobby = function (lobbyId, playerId, nickname) {
@@ -104,11 +102,41 @@ exports.joinLobby = function (lobbyId, playerId, nickname) {
     client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId)), { retain: true });
 }
 
-exports.drawBlack = function (lobbyId) {
+_checkAllReady = function (lobbyId) {
+    for (p of lobbies.get(lobbyId).players) {
+        if (p.ready == false) return false;
+    }
+    return true;
+}
+
+_startGame = function (lobbyId) {
+    console.log("Starting");
+    const currentLobbyInfo = lobbies.get(lobbyId);
+    const playersData=currentLobbyInfo.players.map((p) =>
+    ({
+        "id": p.id,
+        "nickname": p.nickname,
+        "isMyTurn": false,
+        "score": 0,
+    }));
+    const newLobby = {
+        "open": false,
+        "roundDuration": currentLobbyInfo.roundDuration,
+        "maxRoundNumber": currentLobbyInfo.maxRoundNumber,
+        "currentRound": 0,
+        "currentBlackCard": _drawBlack(lobbyId),
+        "players": playersData,
+    }
+    lobbies.set(lobbyId, newLobby);
+    client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId)), { retain: true });
+}
+
+_drawBlack = function (lobbyId) {
     if (client.disconnected) throw 500;
     if (lobbies.get(lobbyId) == undefined || cards.get(lobbyId) == undefined) throw 404;
     const card = cards.get(lobbyId).drawBlackCard;
-    if(card==undefined) throw 404;
+    if (card == undefined) throw 404;
+    console.log(card);
     return card;
 }
 
@@ -116,7 +144,7 @@ exports.drawWhite = function (lobbyId) {
     if (client.disconnected) throw 500;
     if (lobbies.get(lobbyId) == undefined || cards.get(lobbyId) == undefined) throw 404;
     const card = cards.get(lobbyId).drawWhiteCard;
-    if(card==undefined) throw 404;
+    if (card == undefined) throw 404;
     return card;
 }
 

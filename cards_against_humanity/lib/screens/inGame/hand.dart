@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 class Hand extends StatelessWidget {
   const Hand({super.key});
   static List<WhiteCard> cards = [
-    WhiteCard("0", "TEst"),
-    WhiteCard("1", "Adolf"),
-    WhiteCard("2", "La meloni"),
-    WhiteCard("3", "Attacco terroristico"),
-    WhiteCard("4", "Anal shipment"),
-    WhiteCard("5", "Donga"),
-    WhiteCard("6", "Mea CUM laida"),
+    WhiteCard(0, "TEst"),
+    WhiteCard(1, "Adolf"),
+    WhiteCard(2, "La meloni"),
+    WhiteCard(3, "Attacco terroristico"),
+    WhiteCard(4, "Anal shipment"),
+    WhiteCard(5, "Donga"),
+    WhiteCard(6, "Mea CUM laida"),
   ];
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class Hand extends StatelessWidget {
                     (e) => CardItem(
                         key: ValueKey(e.id),
                         text: e.text,
-                        index: double.parse(e.id)),
+                        index: e.id.toDouble()),
                   )
                   .toList(),
             ],

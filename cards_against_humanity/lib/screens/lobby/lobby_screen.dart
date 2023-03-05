@@ -2,8 +2,10 @@ import 'package:cards_against_humanity/helpers/http_helper.dart';
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/models/lobby.dart';
 import 'package:cards_against_humanity/models/user.dart';
+import 'package:cards_against_humanity/screens/inGame/game_screen.dart';
 import 'package:cards_against_humanity/widgets/custom_layouts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 class LobbyScreen extends StatefulWidget {
@@ -30,40 +32,53 @@ class _LobbyScreenState extends State<LobbyScreen> {
     }
   }
 
+  void _handleStartGame() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      Navigator.of(context).pushReplacementNamed(GameScreen.routeName);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     lobbyData = Provider.of<MqttClientWrapper>(context).lobby;
-    return CustomLayouts.mainLayout([
-      Text("Lobby code: ${lobbyData?.id}"),
-      Text("duration: ${lobbyData?.roundDuration}"),
-      const SizedBox(
-        height: 10,
-      ),
-      SizedBox(
-        height: MediaQuery.of(context).size.height * 0.5,
-        width: MediaQuery.of(context).size.width * 0.7,
-        child: GridView(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 2,
-            childAspectRatio: 4 / 2,
-          ),
-          children: [
-            ...?lobbyData?.players.map(
-              (e) => PlayerInLobbyListItem(
-                  playerName: e.nickname, ready: e.isReady),
-            ),
-          ],
+    if (lobbyData == null) {
+      return CustomLayouts.mainLayout([
+        const CircularProgressIndicator(),
+      ], context);
+    } else {
+      if (!lobbyData!.open) _handleStartGame();
+      return CustomLayouts.mainLayout([
+        Text("Lobby code: ${lobbyData?.id}"),
+        Text("duration: ${lobbyData?.roundDuration}"),
+        const SizedBox(
+          height: 10,
         ),
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      ElevatedButton(
-        onPressed: isReady ? null : () => _handleReady(lobbyData?.id ?? ""),
-        child: const Text("I'm ready!"),
-      ),
-    ], context);
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.5,
+          width: MediaQuery.of(context).size.width * 0.7,
+          child: GridView(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 2,
+              childAspectRatio: 4 / 2,
+            ),
+            children: [
+              ...?lobbyData?.players.map(
+                (e) => PlayerInLobbyListItem(
+                    playerName: e.nickname, ready: e.isReady),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        ElevatedButton(
+          onPressed: isReady ? null : () => _handleReady(lobbyData?.id ?? ""),
+          child: const Text("I'm ready!"),
+        ),
+      ], context);
+    }
   }
 
   void _handleReady(String lobbyId) async {

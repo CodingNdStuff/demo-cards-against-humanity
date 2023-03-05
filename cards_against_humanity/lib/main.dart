@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: ((context) => MqttClientWrapper())),
         ChangeNotifierProvider(
             create: ((context) => User(
-                playerData: Player.basic(DateTime.now().toString(),
+                playerData: Player(DateTime.now().toString(),
                     "player-${Random().nextInt(100000)}")))),
         ChangeNotifierProvider(create: ((context) => ApiChangeNotifier())),
       ],
@@ -44,8 +44,8 @@ class MyApp extends StatelessWidget {
           LobbyScreen.routeName: (ctx) => const LobbyScreen(),
           GameScreen.routeName: (ctx) => const GameScreen(),
         },
-        // initialRoute: HomeScreen.routeName,
-        initialRoute: GameScreen.routeName,
+        initialRoute: HomeScreen.routeName,
+        // initialRoute: GameScreen.routeName,
       ),
     );
   }

@@ -3,10 +3,11 @@ import 'package:cards_against_humanity/models/player.dart';
 
 class Lobby {
   String id;
+  bool open;
   int roundDuration;
   int maxRoundNumber;
   List<Player> players = [];
-  int currentRound;
+  int? currentRound;
   BlackCard? currentBlackCard;
   Lobby(
       {required this.id,
@@ -14,5 +15,13 @@ class Lobby {
       required this.maxRoundNumber,
       this.currentBlackCard,
       required this.currentRound,
-      required this.players});
+      required this.players,
+      this.open = false});
+
+  Lobby.open(
+      {required this.id,
+      required this.roundDuration,
+      required this.maxRoundNumber,
+      required this.players,
+      this.open = true});
 }

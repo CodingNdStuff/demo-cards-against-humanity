@@ -5,9 +5,9 @@ class Player {
   bool isMyTurn = false;
   bool isReady = false;
 
-  Player(this.id, this.nickname, this.isReady, this.score, this.isMyTurn);
+  Player(this.id, this.nickname);
   Player.inLobby(this.id, this.nickname, this.isReady);
-  Player.basic(this.id, this.nickname);
+  Player.inGame(this.id, this.nickname, this.score, this.isMyTurn);
   void setNickname(String newNickname) {
     nickname = newNickname;
   }

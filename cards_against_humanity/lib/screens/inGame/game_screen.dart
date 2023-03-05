@@ -29,7 +29,7 @@ class GameScreen extends StatelessWidget {
   };
 
   static BlackCard currentCard = BlackCard(
-      "1", "News - Naufragio a Napoli, la reazione della Meloni: _ .", 1);
+      1, "News - Naufragio a Napoli, la reazione della Meloni: _ .", 1);
   @override
   Widget build(BuildContext context) {
     return Scaffold(

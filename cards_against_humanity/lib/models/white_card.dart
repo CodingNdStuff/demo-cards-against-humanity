@@ -1,5 +1,5 @@
 class WhiteCard {
-  final String id;
+  final int id;
   final String text;
   WhiteCard(this.id, this.text);
 }

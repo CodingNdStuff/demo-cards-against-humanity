@@ -79,20 +79,52 @@ class MqttClientWrapper with ChangeNotifier {
     final String topic = event[0].topic;
     final String message =
         MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-    final lobbyJsonObj = json.decode(message);
-    List<dynamic> playerListObject = lobbyJsonObj["players"] as List<dynamic>;
+    final lobbyJsonObject = json.decode(message);
+    if (lobbyJsonObject["open"] == true) {
+      _updateOpenLobby(lobbyJsonObject, topic);
+    } else {
+      _updateClosedLobby(lobbyJsonObject, topic);
+    }
+    notifyListeners();
+  }
+
+  void _updateOpenLobby(lobbyJsonObject, lobbyId) {
+    List<dynamic> playerListObject =
+        lobbyJsonObject["players"] as List<dynamic>;
     List<Player> playerList = playerListObject
         .map((e) => Player.inLobby(e["id"], e["nickname"], e["ready"] as bool))
         .toList();
-    lobby = Lobby(
-      id: topic,
-      roundDuration: lobbyJsonObj["roundDuration"] as int,
-      maxRoundNumber: lobbyJsonObj["maxRoundNumber"] as int,
-      currentRound: lobbyJsonObj["currentRound"] as int,
+    lobby = Lobby.open(
+      id: lobbyId,
+      roundDuration: lobbyJsonObject["roundDuration"] as int,
+      maxRoundNumber: lobbyJsonObject["maxRoundNumber"] as int,
       players: playerList,
-      currentBlackCard: lobbyJsonObj["currentBlackCard"] as BlackCard?,
     );
-    notifyListeners();
+  }
+
+  void _updateClosedLobby(lobbyJsonObject, lobbyId) {
+    List<dynamic> playerListObject =
+        lobbyJsonObject["players"] as List<dynamic>;
+    List<Player> playerList = playerListObject
+        .map((e) => Player.inGame(
+              e["id"],
+              e["nickname"],
+              e["score"] as int,
+              e["isMyTurn"] as bool,
+            ))
+        .toList();
+    BlackCard card = BlackCard(
+        lobbyJsonObject["currentBlackCard"]["id"] as int,
+        lobbyJsonObject["currentBlackCard"]["text"],
+        lobbyJsonObject["currentBlackCard"]["numberOfBlanks"] as int);
+    lobby = Lobby(
+      id: lobbyId,
+      roundDuration: lobbyJsonObject["roundDuration"] as int,
+      maxRoundNumber: lobbyJsonObject["maxRoundNumber"] as int,
+      players: playerList,
+      currentRound: lobbyJsonObject["currentRound"] as int,
+      currentBlackCard: card,
+    );
   }
 
   void _publish(String topic, String message) {
