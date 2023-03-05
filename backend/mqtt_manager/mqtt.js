@@ -1,5 +1,5 @@
 const mqtt = require('mqtt');
-const { map } = require('..');
+const CardsList = require('../card_management/cards');
 const clientId = 'mqttjs_server'// + Math.random().toString(16).substr(2, 8);
 const host = 'ws://localhost:8080';
 
@@ -26,6 +26,7 @@ const client = mqtt.connect(host, options);
 
 
 let lobbies = new Map();
+let cards = new Map();
 
 client.on('error', function (err) {
     console.log(err);
@@ -67,8 +68,13 @@ exports.createLobby = function (id, nickname, roundDuration, maxRoundNumber) {
                 "ready": false,
             },
         ],
+
     }
     lobbies.set(newLobbyId, newLobby);
+    // 
+        // const blackCardsList= new CardsList();
+        cards.set(newLobbyId, new CardsList());
+    //
     client.publish(newLobbyId, JSON.stringify(lobbies.get(newLobbyId)), { retain: true });
     return newLobbyId;
 }
@@ -96,6 +102,22 @@ exports.joinLobby = function (lobbyId, playerId, nickname) {
         "ready": false,
     });
     client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId)), { retain: true });
+}
+
+exports.drawBlack = function (lobbyId) {
+    if (client.disconnected) throw 500;
+    if (lobbies.get(lobbyId) == undefined || cards.get(lobbyId) == undefined) throw 404;
+    const card = cards.get(lobbyId).drawBlackCard;
+    if(card==undefined) throw 404;
+    return card;
+}
+
+exports.drawWhite = function (lobbyId) {
+    if (client.disconnected) throw 500;
+    if (lobbies.get(lobbyId) == undefined || cards.get(lobbyId) == undefined) throw 404;
+    const card = cards.get(lobbyId).drawWhiteCard;
+    if(card==undefined) throw 404;
+    return card;
 }
 
 const _generateUniqueId = function (list) {

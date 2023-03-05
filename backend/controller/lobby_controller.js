@@ -53,7 +53,7 @@ router.post('/setPlayerReady/:lobbyId/:playerId', [
             return res.status(404).end();
     }
 
-    return res.status(201).json(lobbyId);
+    return res.status(201).end();
 });
 
 router.post('/joinLobby/:lobbyId', [
@@ -83,7 +83,51 @@ router.post('/joinLobby/:lobbyId', [
             return res.status(404).end();
     }
     console.log("New user joined the lobby");
-    return res.status(201).json(lobbyId);
+    return res.status(201).end();
 });
+
+
+router.get('/drawBlack/:lobbyId', [
+    param('lobbyId').exists().isString().isLength({ min: 8, max: 8, }),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ error: errors.array() });
+    }
+
+    const lobbyId = req.params.lobbyId;
+    let card;
+    try {
+        card = mqtt.drawBlack(lobbyId);
+    } catch (err) {
+        if (err == 500)
+            return res.status(500).end();
+        if (err == 404)
+            return res.status(404).end();
+    }
+    return res.status(200).json(card);
+});
+
+router.get('/drawWhite/:lobbyId', [
+    param('lobbyId').exists().isString().isLength({ min: 8, max: 8, }),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ error: errors.array() });
+    }
+
+    const lobbyId = req.params.lobbyId;
+    let card;
+    try {
+        card = mqtt.drawWhite(lobbyId);
+    } catch (err) {
+        if (err == 500)
+            return res.status(500).end();
+        if (err == 404)
+            return res.status(404).end();
+    }
+    return res.status(200).json(card);
+});
+
 
 module.exports = router;
