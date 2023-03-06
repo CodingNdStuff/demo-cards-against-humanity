@@ -56,7 +56,7 @@ exports.createLobby = function (id, nickname, roundDuration, maxRoundNumber) {
 
     const newLobbyId = "4jjjnpe6"
     const newLobby = {
-        "open": true,
+        "status": "open",
         "roundDuration": roundDuration,
         "maxRoundNumber": maxRoundNumber,
         "players": [
@@ -117,10 +117,13 @@ _startGame = function (lobbyId) {
         "id": p.id,
         "nickname": p.nickname,
         "isMyTurn": false,
+        "ready": false,
         "score": 0,
     }));
+    let index = Math.floor(Math.random()*playersData.length);
+    playersData[index]["isMyTurn"]=true;
     const newLobby = {
-        "open": false,
+        "status": "initial",
         "roundDuration": currentLobbyInfo.roundDuration,
         "maxRoundNumber": currentLobbyInfo.maxRoundNumber,
         "currentRound": 0,

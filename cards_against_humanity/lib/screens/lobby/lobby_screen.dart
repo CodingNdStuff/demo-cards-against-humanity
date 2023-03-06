@@ -46,7 +46,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
         const CircularProgressIndicator(),
       ], context);
     } else {
-      if (!lobbyData!.open) _handleStartGame();
+      if (!(lobbyData!.phase == status.open)) _handleStartGame();
       return CustomLayouts.mainLayout([
         Text("Lobby code: ${lobbyData?.id}"),
         Text("duration: ${lobbyData?.roundDuration}"),

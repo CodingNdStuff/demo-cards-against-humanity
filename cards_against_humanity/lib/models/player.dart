@@ -7,7 +7,8 @@ class Player {
 
   Player(this.id, this.nickname);
   Player.inLobby(this.id, this.nickname, this.isReady);
-  Player.inGame(this.id, this.nickname, this.score, this.isMyTurn);
+  Player.inGame(
+      this.id, this.nickname, this.isReady, this.score, this.isMyTurn);
   void setNickname(String newNickname) {
     nickname = newNickname;
   }

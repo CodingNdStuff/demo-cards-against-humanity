@@ -80,7 +80,9 @@ class MqttClientWrapper with ChangeNotifier {
     final String message =
         MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
     final lobbyJsonObject = json.decode(message);
-    if (lobbyJsonObject["open"] == true) {
+    status phase = status.values.byName(lobbyJsonObject[
+        "status"]); // sort of casting from string to enum status
+    if (phase == status.open) {
       _updateOpenLobby(lobbyJsonObject, topic);
     } else {
       _updateClosedLobby(lobbyJsonObject, topic);
@@ -92,7 +94,11 @@ class MqttClientWrapper with ChangeNotifier {
     List<dynamic> playerListObject =
         lobbyJsonObject["players"] as List<dynamic>;
     List<Player> playerList = playerListObject
-        .map((e) => Player.inLobby(e["id"], e["nickname"], e["ready"] as bool))
+        .map((e) => Player.inLobby(
+              e["id"],
+              e["nickname"],
+              e["ready"] as bool,
+            ))
         .toList();
     lobby = Lobby.open(
       id: lobbyId,
@@ -109,6 +115,7 @@ class MqttClientWrapper with ChangeNotifier {
         .map((e) => Player.inGame(
               e["id"],
               e["nickname"],
+              e["ready"] as bool,
               e["score"] as int,
               e["isMyTurn"] as bool,
             ))
@@ -124,6 +131,7 @@ class MqttClientWrapper with ChangeNotifier {
       players: playerList,
       currentRound: lobbyJsonObject["currentRound"] as int,
       currentBlackCard: card,
+      phase: status.values.byName(lobbyJsonObject["status"]),
     );
   }
 

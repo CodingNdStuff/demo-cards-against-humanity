@@ -1,27 +1,31 @@
 import 'package:cards_against_humanity/models/black_card.dart';
 import 'package:cards_against_humanity/models/player.dart';
 
+// ignore: camel_case_types
+enum status { open, initial, play, voting, preparation, closed }
+
 class Lobby {
   String id;
-  bool open;
+  status phase;
   int roundDuration;
   int maxRoundNumber;
   List<Player> players = [];
   int? currentRound;
   BlackCard? currentBlackCard;
-  Lobby(
-      {required this.id,
-      required this.roundDuration,
-      required this.maxRoundNumber,
-      this.currentBlackCard,
-      required this.currentRound,
-      required this.players,
-      this.open = false});
+  Lobby({
+    required this.id,
+    required this.roundDuration,
+    required this.maxRoundNumber,
+    this.currentBlackCard,
+    required this.currentRound,
+    required this.players,
+    required this.phase,
+  });
 
   Lobby.open(
       {required this.id,
       required this.roundDuration,
       required this.maxRoundNumber,
       required this.players,
-      this.open = true});
+      this.phase = status.open});
 }

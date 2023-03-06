@@ -1,11 +1,14 @@
-import 'package:cards_against_humanity/models/black_card.dart';
+import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class TableWidget extends StatelessWidget {
-  const TableWidget({super.key, required this.currentCard});
-  final BlackCard currentCard;
+  const TableWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final currentCard =
+        Provider.of<MqttClientWrapper>(context).lobby!.currentBlackCard;
     return Container(
       height: MediaQuery.of(context).size.height * 0.6,
       width: MediaQuery.of(context).size.width * 0.65,
@@ -14,14 +17,10 @@ class TableWidget extends StatelessWidget {
       color: Colors.black,
       child: Center(
         child: Text(
-          parseText,
+          currentCard!.text.replaceAll("_", "_______"),
           style: Theme.of(context).textTheme.headline3,
         ),
       ),
     );
-  }
-
-  String get parseText {
-    return currentCard.text.replaceAll("_", "_______");
   }
 }

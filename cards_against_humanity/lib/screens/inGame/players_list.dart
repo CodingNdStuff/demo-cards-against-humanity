@@ -1,11 +1,14 @@
+import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/screens/inGame/players_list_item.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class PlayersList extends StatelessWidget {
-  const PlayersList({super.key, required this.players});
-  final Map<String, dynamic> players;
+  const PlayersList({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final playersList = Provider.of<MqttClientWrapper>(context).lobby!.players;
     return Container(
       color: Colors.grey[200],
       height: MediaQuery.of(context).size.height * 0.6,
@@ -13,12 +16,12 @@ class PlayersList extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            ...players.entries
-                .map((e) => SizedBox(
+            ...playersList
+                .map((p) => SizedBox(
                       width: (MediaQuery.of(context).size.width) * 0.25,
                       child: PlayerListItem(
-                        playerName: e.key,
-                        playerScore: e.value["score"],
+                        playerName: p.nickname,
+                        playerScore: p.score,
                       ),
                     ))
                 .toList(),
