@@ -72,7 +72,12 @@ exports.createLobby = function (id, nickname, roundDuration, maxRoundNumber) {
     // const blackCardsList= new CardsList();
     cards.set(newLobbyId, new CardsList());
     //
-    client.publish(newLobbyId, JSON.stringify(lobbies.get(newLobbyId)), { retain: true });
+    client.publish(newLobbyId, JSON.stringify(lobbies.get(newLobbyId), (key, value) => {
+        if (typeof value === 'string') {
+          return encodeURIComponent(value);
+        }
+        return value;
+      }), { retain: true });
     return newLobbyId;
 }
 exports.setPlayerReady = function (lobbyId, playerId) {
@@ -87,7 +92,12 @@ exports.setPlayerReady = function (lobbyId, playerId) {
         }
     });
     if (!found) throw 404;
-    client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId)), { retain: true });
+    client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId), (key, value) => {
+        if (typeof value === 'string') {
+          return encodeURIComponent(value);
+        }
+        return value;
+      }), { retain: true });
     if (_checkAllReady(lobbyId)) _startGame(lobbyId);
 }
 
@@ -99,7 +109,12 @@ exports.joinLobby = function (lobbyId, playerId, nickname) {
         "nickname": nickname,
         "ready": false,
     });
-    client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId)), { retain: true });
+    client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId), (key, value) => {
+        if (typeof value === 'string') {
+          return encodeURIComponent(value);
+        }
+        return value;
+      }), { retain: true });
 }
 
 _checkAllReady = function (lobbyId) {
@@ -131,7 +146,27 @@ _startGame = function (lobbyId) {
         "players": playersData,
     }
     lobbies.set(lobbyId, newLobby);
-    client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId)), { retain: true });
+    client.publish(lobbyId, JSON.stringify(lobbies.get(lobbyId), (key, value) => {
+        if (typeof value === 'string') {
+          return encodeURIComponent(value);
+        }
+        return value;
+      }), { retain: true });
+
+      //
+      currentLobbyInfo.players.forEach((p)=>{
+        console.log(lobbyId+"/"+p.id);
+        let hand=[];
+        for(let i=0;i<10;i++){
+            hand.push(_drawWhite(lobbyId));
+        }
+        client.publish(lobbyId+"/"+p.id, JSON.stringify(hand, (key, value) => {
+            if (typeof value === 'string') {
+              return encodeURIComponent(value);
+            }
+            return value;
+          }), { retain: true });
+      });
 }
 
 _drawBlack = function (lobbyId) {
@@ -143,7 +178,7 @@ _drawBlack = function (lobbyId) {
     return card;
 }
 
-exports.drawWhite = function (lobbyId) {
+_drawWhite = function (lobbyId) {
     if (client.disconnected) throw 500;
     if (lobbies.get(lobbyId) == undefined || cards.get(lobbyId) == undefined) throw 404;
     const card = cards.get(lobbyId).drawWhiteCard;

@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:cards_against_humanity/models/black_card.dart';
 import 'package:cards_against_humanity/models/lobby.dart';
 import 'package:cards_against_humanity/models/player.dart';
+import 'package:cards_against_humanity/models/white_card.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
@@ -17,6 +18,8 @@ class MqttClientWrapper with ChangeNotifier {
   static MqttClientConnectionStatus? connectionState;
   StreamSubscription? subscription;
   Lobby? lobby;
+  List<WhiteCard>? hand;
+
   void _subscribeToTopic(String topic) {
     try {
       if (connectionState?.state == MqttConnectionState.connected) {
@@ -71,6 +74,7 @@ class MqttClientWrapper with ChangeNotifier {
 
     subscription = client?.updates?.listen(_onMessage);
     _subscribeToTopic(topic);
+    _subscribeToTopic("$topic/$playerId");
   }
 
   void _onMessage(List<MqttReceivedMessage> event) {
@@ -79,7 +83,30 @@ class MqttClientWrapper with ChangeNotifier {
     final String topic = event[0].topic;
     final String message =
         MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-    final lobbyJsonObject = json.decode(message);
+    final lobbyJsonObject = jsonDecode(message);
+    print(lobbyJsonObject);
+    if (topic.contains("/")) {
+      _handleHandUpdates(lobbyJsonObject);
+    } else {
+      _handleLobbyUpdates(lobbyJsonObject, topic);
+    }
+
+    notifyListeners();
+  }
+
+  void _handleHandUpdates(List<dynamic> handJsonObject) {
+    print(handJsonObject);
+    hand = handJsonObject
+        .map(
+          (c) => WhiteCard(
+            c["id"],
+            Uri.decodeComponent(c["text"]),
+          ),
+        )
+        .toList();
+  }
+
+  void _handleLobbyUpdates(lobbyJsonObject, topic) {
     status phase = status.values.byName(lobbyJsonObject[
         "status"]); // sort of casting from string to enum status
     if (phase == status.open) {
@@ -87,7 +114,6 @@ class MqttClientWrapper with ChangeNotifier {
     } else {
       _updateClosedLobby(lobbyJsonObject, topic);
     }
-    notifyListeners();
   }
 
   void _updateOpenLobby(lobbyJsonObject, lobbyId) {
@@ -96,7 +122,7 @@ class MqttClientWrapper with ChangeNotifier {
     List<Player> playerList = playerListObject
         .map((e) => Player.inLobby(
               e["id"],
-              e["nickname"],
+              Uri.decodeComponent(e["nickname"]),
               e["ready"] as bool,
             ))
         .toList();
@@ -114,7 +140,7 @@ class MqttClientWrapper with ChangeNotifier {
     List<Player> playerList = playerListObject
         .map((e) => Player.inGame(
               e["id"],
-              e["nickname"],
+              Uri.decodeComponent(e["nickname"]),
               e["ready"] as bool,
               e["score"] as int,
               e["isMyTurn"] as bool,
@@ -122,7 +148,7 @@ class MqttClientWrapper with ChangeNotifier {
         .toList();
     BlackCard card = BlackCard(
         lobbyJsonObject["currentBlackCard"]["id"] as int,
-        lobbyJsonObject["currentBlackCard"]["text"],
+        Uri.decodeComponent(lobbyJsonObject["currentBlackCard"]["text"]),
         lobbyJsonObject["currentBlackCard"]["numberOfBlanks"] as int);
     lobby = Lobby(
       id: lobbyId,

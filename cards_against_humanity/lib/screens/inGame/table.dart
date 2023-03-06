@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,9 @@ class TableWidget extends StatelessWidget {
       padding: const EdgeInsets.all(15),
       color: Colors.black,
       child: Center(
-        child: Text(
+        child: AutoSizeText(
+          maxLines: 5,
+          wrapWords: false,
           currentCard!.text.replaceAll("_", "_______"),
           style: Theme.of(context).textTheme.headline3,
         ),

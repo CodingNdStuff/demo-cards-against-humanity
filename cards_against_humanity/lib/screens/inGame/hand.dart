@@ -1,5 +1,8 @@
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/models/white_card.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Hand extends StatelessWidget {
   const Hand({super.key});
@@ -14,6 +17,7 @@ class Hand extends StatelessWidget {
   ];
   @override
   Widget build(BuildContext context) {
+    final hand = Provider.of<MqttClientWrapper>(context).hand!;
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.7,
       height: 200,
@@ -24,7 +28,7 @@ class Hand extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              ...cards
+              ...hand
                   .map(
                     (e) => CardItem(
                         key: ValueKey(e.id),
@@ -77,8 +81,10 @@ class _CardItemState extends State<CardItem> {
           ),
           color: Colors.grey,
         ),
-        child: Text(
+        child: AutoSizeText(
+          maxLines: 8,
           widget.text,
+          wrapWords: false,
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
