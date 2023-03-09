@@ -8,7 +8,8 @@ class PlayersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final playersList = Provider.of<MqttClientWrapper>(context).lobby!.players;
+    final lobbyData = Provider.of<MqttClientWrapper>(context).lobby!;
+    final playersList = lobbyData.players;
     return Container(
       color: Colors.grey[200],
       height: MediaQuery.of(context).size.height * 0.6,
@@ -20,9 +21,11 @@ class PlayersList extends StatelessWidget {
                 .map((p) => SizedBox(
                       width: (MediaQuery.of(context).size.width) * 0.25,
                       child: PlayerListItem(
-                        playerName: p.nickname,
-                        playerScore: p.score,
-                      ),
+                          playerName: p.nickname,
+                          playerScore: p.score,
+                          isReady: p.isReady,
+                          isMyTurn: p.isMyTurn,
+                          phase: lobbyData.phase),
                     ))
                 .toList(),
           ],

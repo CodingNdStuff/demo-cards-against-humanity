@@ -2,18 +2,16 @@ const black_cards = require("./black_cards");
 const white_cards = require("./white_cards");
 
 
-module.exports = class CardsList{
+module.exports = class Deck{
     #listBlack = [...black_cards,...blackCards];
     #listWhite = [...white_cards,...whiteCards];
     constructor() {
-      }
+    }
 
     get drawBlackCard(){
         let index=Math.floor(Math.random()*this.#listBlack.length);
         const card=this.#listBlack.at(index);
         this.#listBlack.splice(index,1);
-        console.log(index);
-        console.log(this.#listBlack.length);
         console.log(card);
         return card;
     }
@@ -22,8 +20,6 @@ module.exports = class CardsList{
         let index=Math.floor(Math.random()*this.#listWhite.length);
         const card=this.#listWhite.at(index);
         this.#listWhite.splice(index,1);
-        console.log(index);
-        console.log(this.#listWhite.length);
         console.log(card);
         return card;
     }

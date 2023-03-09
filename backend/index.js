@@ -59,7 +59,7 @@ if(req.isAuthenticated()) {
 //routers
 app.use(express.json());
 const lobbyController=require("./controller/lobby_controller");
-app.use("/api",lobbyController);
+app.use("/api", lobbyController);
 
 // Creating the session
 

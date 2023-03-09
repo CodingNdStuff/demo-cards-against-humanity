@@ -771,18 +771,18 @@ module.exports=[
     },
     {
         "id": 155,
-        "text": "Ok ragazzi, la confraternita è stata radiata, e le gnocche sono tutte alla Gamma Fi. E' ora di dare inizio all'operazione __.",
-        "numberOfBlanks": 2
+        "text": "Ok ragazzi, la confraternita è stata radiata, e le gnocche sono tutte alla Gamma Fi. E' ora di dare inizio all'operazione _.",
+        "numberOfBlanks": 1
     },
     {
         "id": 156,
-        "text": "Quando sarò Re, come terrò in riga i miei sudditi? __.",
-        "numberOfBlanks": 2
+        "text": "Quando sarò Re, come terrò in riga i miei sudditi? _.",
+        "numberOfBlanks": 1
     },
     {
         "id": 157,
-        "text": "Caro Leader Kim Jong-Un, il nostro villaggio rende gloria alla vostra infinita saggezza con l'umile offerta di _______.",
-        "numberOfBlanks": 7
+        "text": "Caro Leader Kim Jong-Un, il nostro villaggio rende gloria alla vostra infinita saggezza con l'umile offerta di _.",
+        "numberOfBlanks": 1
     },
     {
         "id": 158,
@@ -806,8 +806,8 @@ module.exports=[
     },
     {
         "id": 162,
-        "text": "Come compenso il mio minuscolo pene? __.",
-        "numberOfBlanks": 2
+        "text": "Come compenso il mio minuscolo pene? _.",
+        "numberOfBlanks": 1
     },
     {
         "id": 163,
@@ -826,8 +826,8 @@ module.exports=[
     },
     {
         "id": 166,
-        "text": "Se non si può gestire ___, sarebbe opportuno tenersi alla larga da _______.",
-        "numberOfBlanks": 10
+        "text": "Se non si può gestire _, sarebbe opportuno tenersi alla larga da _.",
+        "numberOfBlanks": 2
     },
     {
         "id": 167,
@@ -841,12 +841,7 @@ module.exports=[
     },
     {
         "id": 169,
-        "text": "È in agguato nella notte. È affamato di sangue.",
-        "numberOfBlanks": 0
-    },
-    {
-        "id": 170,
-        "text": "Quest'estate, nessuno si salverà da _.",
+        "text": "È in agguato nella notte. È affamato di sangue. Quest'estate, nessuno si salverà da _.",
         "numberOfBlanks": 1
     },
     {
@@ -866,8 +861,8 @@ module.exports=[
     },
     {
         "id": 174,
-        "text": "I giapponesi hanno sviluppato una versione più piccola e più efficiente di _______.",
-        "numberOfBlanks": 7
+        "text": "I giapponesi hanno sviluppato una versione più piccola e più efficiente di _.",
+        "numberOfBlanks": 1
     },
     {
         "id": 175,
@@ -891,8 +886,8 @@ module.exports=[
     },
     {
         "id": 179,
-        "text": "Che cosa è divertente fino a che non diventa imbarazzante? __.",
-        "numberOfBlanks": 2
+        "text": "Che cosa è divertente fino a che non diventa imbarazzante? _.",
+        "numberOfBlanks": 1
     },
     {
         "id": 180,
@@ -936,8 +931,8 @@ module.exports=[
     },
     {
         "id": 188,
-        "text": "Non dimenticatevi! A partire da questa settimana, il Casual Friday diventerà ufficialmente \"_______ Friday\".",
-        "numberOfBlanks": 7
+        "text": "Non dimenticatevi! A partire da questa settimana, il Casual Friday diventerà ufficialmente \"_ Friday\".",
+        "numberOfBlanks": 1
     },
     {
         "id": 189,
@@ -951,8 +946,8 @@ module.exports=[
     },
     {
         "id": 191,
-        "text": "Ascoltate la mia voce, mortali! Sono il Dio _, e non tollererò _______!",
-        "numberOfBlanks": 8
+        "text": "Ascoltate la mia voce, mortali! Sono il Dio _, e non tollererò _!",
+        "numberOfBlanks": 1
     },
     {
         "id": 192,

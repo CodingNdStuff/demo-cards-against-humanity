@@ -30,8 +30,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: ((context) => MqttClientWrapper())),
         ChangeNotifierProvider(
             create: ((context) => User(
-                playerData: Player(DateTime.now().toString(),
-                    "player-${Random().nextInt(100000)}")))),
+                playerData:
+                    Player("1", "player-${Random().nextInt(100000)}")))),
         ChangeNotifierProvider(create: ((context) => ApiChangeNotifier())),
       ],
       child: MaterialApp(
