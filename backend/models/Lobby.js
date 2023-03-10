@@ -48,7 +48,7 @@ module.exports = class Lobby {
             "roundDuration": this.roundDuration,
             "maxRoundNumber": this.maxRoundNumber,
             "currentRound":this.currentRound,
-            "currentBlackCard": this.currentBlackCard,
+            "currentBlackCard": this.round.currentBlackCard,
             "players": mappedPlayerList,
         }
     }

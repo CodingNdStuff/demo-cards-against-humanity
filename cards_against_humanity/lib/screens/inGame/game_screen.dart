@@ -29,7 +29,7 @@ class GameScreen extends StatelessWidget {
             Positioned(
               bottom: 0,
               left: MediaQuery.of(context).size.width * 0.15,
-              child: const Hand(),
+              child: Hand(),
             ),
           ],
         ),

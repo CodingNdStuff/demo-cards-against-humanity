@@ -996,12 +996,7 @@ module.exports=[
     },
     {
         "id": 201,
-        "text": "I sintomi del paziente sono _.",
-        "numberOfBlanks": 1
-    },
-    {
-        "id": 202,
-        "text": "Probabilmente il risultato di _.",
+        "text": "I sintomi del paziente sono _. Probabilmente il risultato di _.",
         "numberOfBlanks": 1
     },
     {

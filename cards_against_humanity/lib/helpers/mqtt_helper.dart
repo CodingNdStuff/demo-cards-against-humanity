@@ -87,18 +87,16 @@ class MqttClientWrapper with ChangeNotifier {
 
     final lobbyJsonObject = jsonDecode(message);
     print(lobbyJsonObject);
-    return;
-    // if (topic.contains("/")) {
-    //   _handleHandUpdates(lobbyJsonObject);
-    // } else {
-    //   _handleLobbyUpdates(lobbyJsonObject, topic);
-    // }
+    if (topic.contains("/")) {
+      _handleHandUpdates(lobbyJsonObject);
+    } else {
+      _handleLobbyUpdates(lobbyJsonObject, topic);
+    }
 
-    // notifyListeners();
+    notifyListeners();
   }
 
   void _handleHandUpdates(List<dynamic> handJsonObject) {
-    print(handJsonObject);
     hand = handJsonObject
         .map(
           (c) => WhiteCard(
@@ -107,6 +105,7 @@ class MqttClientWrapper with ChangeNotifier {
           ),
         )
         .toList();
+    print("hand is done");
   }
 
   void _handleLobbyUpdates(lobbyJsonObject, topic) {
@@ -115,7 +114,7 @@ class MqttClientWrapper with ChangeNotifier {
     if (phase == status.open) {
       _updateOpenLobby(lobbyJsonObject, topic);
     } else {
-      _updateClosedLobby(lobbyJsonObject, topic);
+      _updateOngoingLobby(lobbyJsonObject, topic);
     }
   }
 
@@ -137,7 +136,8 @@ class MqttClientWrapper with ChangeNotifier {
     );
   }
 
-  void _updateClosedLobby(lobbyJsonObject, lobbyId) {
+  void _updateOngoingLobby(lobbyJsonObject, lobbyId) {
+    print("updating ongoing");
     List<dynamic> playerListObject =
         lobbyJsonObject["players"] as List<dynamic>;
     List<Player> playerList = playerListObject
@@ -149,10 +149,12 @@ class MqttClientWrapper with ChangeNotifier {
               e["isMyTurn"] as bool,
             ))
         .toList();
+    print(playerList);
     BlackCard card = BlackCard(
         lobbyJsonObject["currentBlackCard"]["id"] as int,
         Uri.decodeComponent(lobbyJsonObject["currentBlackCard"]["text"]),
         lobbyJsonObject["currentBlackCard"]["numberOfBlanks"] as int);
+    print(card);
     lobby = Lobby(
       id: lobbyId,
       roundDuration: lobbyJsonObject["roundDuration"] as int,
@@ -175,5 +177,18 @@ class MqttClientWrapper with ChangeNotifier {
     _publish("${lobby?.id}/willmsg", json.encode(playerId));
     client?.disconnect();
     //_onDisconnected();
+  }
+
+  void placeCard(WhiteCard card, int position) {
+    lobby?.currentBlackCard?.placedCards.putIfAbsent(position, () => card);
+    notifyListeners();
+  }
+
+  void takeCardsBack() {
+    lobby?.currentBlackCard?.placedCards.forEach((key, card) {
+      hand?.add(card);
+    });
+    lobby?.currentBlackCard?.placedCards.clear();
+    notifyListeners();
   }
 }

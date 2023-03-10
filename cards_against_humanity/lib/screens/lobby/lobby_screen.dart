@@ -35,14 +35,13 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
   void _handleStartGame() {
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      //Navigator.of(context).pushReplacementNamed(GameScreen.routeName);
+      Navigator.of(context).pushReplacementNamed(GameScreen.routeName);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // lobbyData = Provider.of<MqttClientWrapper>(context).lobby;
-    lobbyData = null;
+    lobbyData = Provider.of<MqttClientWrapper>(context).lobby;
     if (lobbyData == null) {
       return CustomLayouts.mainLayout([
         const CircularProgressIndicator(),
