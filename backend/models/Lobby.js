@@ -34,7 +34,7 @@ module.exports = class Lobby {
     }
 
     getOngoingLobbyData() {
-        if (this.status != Statuses.play) throw 409
+        if (this.status == Statuses.open) throw 409
         const mappedPlayerList = Array.from(this.playerList.entries(),
             ([id, player]) => ({
                 id,
@@ -65,6 +65,7 @@ module.exports = class Lobby {
 
     resetAllPlayerReady(){
         this.playerList.forEach(p => {
+            if(!p.isMyTurn)
             p.isReady = false;
         });
     }

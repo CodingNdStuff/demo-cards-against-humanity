@@ -3,5 +3,6 @@ module.exports = {
     initial: "initial",
     play: "play",
     voting: "voting",
-    prep: "prep"
+    prep: "prep",
+    closed: "closed"
 }

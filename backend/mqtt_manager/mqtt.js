@@ -58,6 +58,22 @@ exports.publishEncoded = function (topic, genericObject) {
         }
         return value;
     }), { retain: true });
+
+}
+
+exports.publishEncodedNoRetain = function (topic, genericObject) {
+    if (client.disconnected) throw 500;
+    client.publish(topic, JSON.stringify(genericObject, (key, value) => {
+        if (typeof value === 'string') {
+            return encodeURIComponent(value);
+        }
+        return value;
+    }), { qos:0, retain: false });
+}
+
+exports.publishEmpty = function (topic) {
+    if (client.disconnected) throw 500;
+    client.publish(topic, "" , { retain: true });
 }
 
 

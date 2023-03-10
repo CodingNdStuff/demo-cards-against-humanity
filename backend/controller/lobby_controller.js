@@ -7,7 +7,7 @@ router.post('/createLobby', [
     body('playerId').exists().isString().isLength({ min: 1, max: 32, }),
     body('nickname').exists().isString().isLength({ min: 1, max: 16, }),
     body('roundDuration').exists().isInt({ min: 15, max: 60, }),
-    body('maxRoundNumber').exists().isInt({ min: 5, max: 15, }),
+    body('maxRoundNumber').exists().isInt({ min: 1, max: 15, }), //todo change to 5
 ], async (req, res) => {
     /*
     {
@@ -159,6 +159,36 @@ router.post('/playCard/:lobbyId/:playerId', [
             return res.status(500).end();
         if (err == 404)
             return res.status(404).end();
+    }
+    return res.status(201).end();
+});
+
+router.post('/voteWinner/:lobbyId/:playerId', [
+    param('lobbyId').exists().isString().isLength({ min: 8, max: 8, }),
+    param('playerId').exists().isString().isLength({ min: 1, max: 32, }),
+    body('votedPlayerId').exists().isString().isLength({ min: 1, max: 32, }),
+], async (req, res) => {
+    /*
+    {
+        "votedPlayerId":123,
+    }
+     */
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ error: errors.array() });
+    }
+    const lobbyId = req.params.lobbyId;
+    const playerId = req.params.playerId;
+    const votedPlayerId = req.body.votedPlayerId;
+    try {
+        core.voteWinner(lobbyId, playerId, votedPlayerId);
+    } catch (err) {
+        if (err == 500)
+            return res.status(500).end();
+        if (err == 404)
+            return res.status(404).end();
+        if (err == 403)
+            return res.status(403).end();
     }
     return res.status(201).end();
 });

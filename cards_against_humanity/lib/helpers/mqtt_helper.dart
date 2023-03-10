@@ -83,15 +83,18 @@ class MqttClientWrapper with ChangeNotifier {
     final String topic = event[0].topic;
     final String message =
         MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+    if (message.isEmpty) return;
+
     final lobbyJsonObject = jsonDecode(message);
     print(lobbyJsonObject);
-    if (topic.contains("/")) {
-      _handleHandUpdates(lobbyJsonObject);
-    } else {
-      _handleLobbyUpdates(lobbyJsonObject, topic);
-    }
+    return;
+    // if (topic.contains("/")) {
+    //   _handleHandUpdates(lobbyJsonObject);
+    // } else {
+    //   _handleLobbyUpdates(lobbyJsonObject, topic);
+    // }
 
-    notifyListeners();
+    // notifyListeners();
   }
 
   void _handleHandUpdates(List<dynamic> handJsonObject) {

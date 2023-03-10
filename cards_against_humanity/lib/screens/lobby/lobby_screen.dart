@@ -25,22 +25,24 @@ class _LobbyScreenState extends State<LobbyScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
-      String lobbyId = ModalRoute.of(context)?.settings.arguments as String;
+      // String lobbyId = ModalRoute.of(context)?.settings.arguments as String;
       final playerId = Provider.of<User>(context, listen: false).playerData.id;
-      Provider.of<MqttClientWrapper>(context).connect(lobbyId, playerId);
+      //Provider.of<MqttClientWrapper>(context).connect(lobbyId, playerId);
+      Provider.of<MqttClientWrapper>(context).connect("4jjjnpe6", playerId);
       _isInitialized = true;
     }
   }
 
   void _handleStartGame() {
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      Navigator.of(context).pushReplacementNamed(GameScreen.routeName);
+      //Navigator.of(context).pushReplacementNamed(GameScreen.routeName);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    lobbyData = Provider.of<MqttClientWrapper>(context).lobby;
+    // lobbyData = Provider.of<MqttClientWrapper>(context).lobby;
+    lobbyData = null;
     if (lobbyData == null) {
       return CustomLayouts.mainLayout([
         const CircularProgressIndicator(),

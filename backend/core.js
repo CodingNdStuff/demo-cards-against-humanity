@@ -1,6 +1,6 @@
 const Lobby = require("./models/Lobby");
 const Statuses = require("./models/Statuses");
-const { publishEncoded } = require("./mqtt_manager/mqtt");
+const { publishEncoded, publishEncodedNoRetain, publishEmpty} = require("./mqtt_manager/mqtt");
 
 
 let lobbies = new Map();
@@ -25,13 +25,19 @@ exports.joinLobby = function (lobbyId, playerId, nickname) {
 exports.setPlayerReady = function (lobbyId, playerId) {
     const currentLobbyData = lobbies.get(lobbyId)
     if (currentLobbyData == undefined) throw 404;
-    if (currentLobbyData.status != Statuses.open) throw 409;
+    if (!(currentLobbyData.status == Statuses.open ||
+        currentLobbyData.status == Statuses.prep)) throw 409;
 
     currentLobbyData.setPlayerReady(playerId);
-    publishEncoded(lobbyId, currentLobbyData.getOpenLobbyData());
+    if(currentLobbyData.status == Statuses.open)
+        publishEncoded(lobbyId, currentLobbyData.getOpenLobbyData());
+    else publishEncoded(lobbyId, currentLobbyData.getOngoingLobbyData());
 
     if (currentLobbyData.checkAllReady()) {
-        _startGame(currentLobbyData);
+        if(currentLobbyData.status == Statuses.open)
+            _startGame(currentLobbyData);
+        if(currentLobbyData.status == Statuses.prep)
+            _prep(currentLobbyData);
     }
 }
 
@@ -46,6 +52,28 @@ exports.playCard = function (lobbyId, playerId, cardIds) {
     if (currentLobbyData.checkAllReady()) {
         _startVoting(currentLobbyData);
     }
+}
+
+exports.voteWinner = function (lobbyId, playerId, votedPlayerId) {
+    const currentLobbyData = lobbies.get(lobbyId)
+    if (currentLobbyData == undefined) throw 404;
+    if (currentLobbyData.status != Statuses.voting) throw 409;
+    const oldWinner = currentLobbyData.playerList.get(playerId);
+    const newWinner = currentLobbyData.playerList.get(votedPlayerId);
+    if (oldWinner == undefined ||
+        newWinner == undefined ||
+        !oldWinner.isMyTurn) throw 403;
+
+    oldWinner.isMyTurn=false;
+    newWinner.isMyTurn=true;
+    newWinner.score+=100;
+    currentLobbyData.currentRound+=1;
+    console.log("voting winner")
+    if(currentLobbyData.currentRound<currentLobbyData.maxRoundNumber)
+        _prep(currentLobbyData);
+    else
+        _close(currentLobbyData);
+
 }
 
 exports.deleteLobby = function (lobbyId) {
@@ -74,34 +102,46 @@ const _generateUniqueId = function (list) {
 
 _startGame = function (currentLobbyData) {
     console.log("Starting");
-    currentLobbyData.status=Statuses.play;
+    currentLobbyData.status = Statuses.play;
     currentLobbyData.resetAllPlayerReady();
     currentLobbyData.refillHands();
     publishEncoded(currentLobbyData.id, currentLobbyData.getOngoingLobbyData());
     currentLobbyData.playerList.forEach(p => {
-        publishEncoded(currentLobbyData.id+"/"+p.id, p.hand);
+        publishEncoded(currentLobbyData.id + "/" + p.id, p.hand);
     });
 }
 
 _startVoting = function (currentLobbyData) {
     console.log("Voting");
-    currentLobbyData.status=Statuses.voting;
+    currentLobbyData.status = Statuses.voting;
     currentLobbyData.resetAllPlayerReady();
     console.log(currentLobbyData.round.playedCards);
-    publishEncoded(currentLobbyData.id+"/voting", currentLobbyData.round.playedCards);
+    publishEncoded(currentLobbyData.id + "/voting", currentLobbyData.round.playedCards);
+}
 
-    //
-    //   currentLobbyInfo.players.forEach((p)=>{
-    //     console.log(lobbyId+"/"+p.id);
-    //     let hand=[];
-    //     for(let i=0;i<10;i++){
-    //         hand.push(_drawWhite(lobbyId));
-    //     }
-    //     client.publish(lobbyId+"/"+p.id, JSON.stringify(hand, (key, value) => {
-    //         if (typeof value === 'string') {
-    //           return encodeURIComponent(value);
-    //         }
-    //         return value;
-    //       }), { retain: true });
-    //   });
+_prep = function (currentLobbyData) {
+    if(currentLobbyData.status == Statuses.voting){
+        console.log("Prep");
+        currentLobbyData.status = Statuses.prep;
+        currentLobbyData.resetAllPlayerReady();
+    }else if(currentLobbyData.status == Statuses.prep){
+        console.log("next round is starting");
+        currentLobbyData.status = Statuses.play;
+        currentLobbyData.resetAllPlayerReady();
+        currentLobbyData.refillHands();
+        currentLobbyData.nextBlackCard();
+    }
+    publishEncoded(currentLobbyData.id, currentLobbyData.getOngoingLobbyData());
+}
+
+_close = function (currentLobbyData) {
+    console.log("Closing");
+    currentLobbyData.status = Statuses.closed;
+    publishEncodedNoRetain(currentLobbyData.id, currentLobbyData.getOngoingLobbyData());
+    publishEmpty(currentLobbyData.id);
+    currentLobbyData.playerList.forEach(p => {
+        publishEmpty(currentLobbyData.id + "/" + p.id);
+    });
+    publishEmpty(currentLobbyData.id + "/voting");
+    lobbies.delete(currentLobbyData.id);
 }
