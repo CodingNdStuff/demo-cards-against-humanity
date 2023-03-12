@@ -2,7 +2,7 @@ import 'package:cards_against_humanity/models/black_card.dart';
 import 'package:cards_against_humanity/models/player.dart';
 
 // ignore: camel_case_types
-enum status { open, initial, play, voting, preparation, closed }
+enum status { open, initial, play, voting, prep, closed }
 
 class Lobby {
   String id;

@@ -5,7 +5,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 class Hand extends StatelessWidget {
-  Hand({super.key});
+  const Hand({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +18,7 @@ class Hand extends StatelessWidget {
     }
 
     void placeCard(double index) {
-      MqttWrapper.placeCard(hand.singleWhere((c) => c.id == index),
-          currentBlackCard.placedCards.length);
+      MqttWrapper.placeCard(hand.singleWhere((c) => c.id == index));
       hand.removeWhere((c) => c.id == index);
       print("Played card");
       print(MqttWrapper.lobby!.currentBlackCard);
@@ -27,7 +26,7 @@ class Hand extends StatelessWidget {
 
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.7,
-      height: 200,
+      height: 150,
       child: ScrollConfiguration(
         behavior: _MyBehavior(),
         child: SingleChildScrollView(
@@ -79,10 +78,6 @@ class CardItem extends StatefulWidget {
 class _CardItemState extends State<CardItem> {
   bool _isSelected = false;
 
-  void _handleStartGame() {
-    SchedulerBinding.instance.addPostFrameCallback((_) {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -95,34 +90,6 @@ class _CardItemState extends State<CardItem> {
           onDismissed: (direction) => widget.placeCard(widget.index),
           confirmDismiss: (direction) {
             return Future.value(widget.canAdd());
-            //   return showDialog(
-            //       context: context,
-            //       builder: (ctx) => AlertDialog(
-            //             title: const Text("Are you sure?"),
-            //             content: const Text(
-            //               "Do you want to remove the item from the cart?",
-            //             ),
-            //             actions: <Widget>[
-            //               TextButton(
-            //                 onPressed: () => Navigator.of(ctx).pop(false),
-            //                 child: Text(
-            //                   "Keep it",
-            //                   style: TextStyle(
-            //                     color: Theme.of(context).primaryColor,
-            //                   ),
-            //                 ),
-            //               ),
-            //               TextButton(
-            //                 onPressed: () => Navigator.of(ctx).pop(true),
-            //                 child: Text(
-            //                   "Remove it",
-            //                   style: TextStyle(
-            //                     color: Theme.of(context).errorColor,
-            //                   ),
-            //                 ),
-            //               ),
-            //             ],
-            //           ));
           },
           child: Container(
             width: _isSelected ? 200 : 150,

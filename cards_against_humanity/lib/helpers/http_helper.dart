@@ -87,4 +87,58 @@ abstract class API {
       throw Failure(code: 1, message: "Server might be offline.");
     }
   }
+
+  static Future<bool> playCard(
+    String lobbyId,
+    String playerId,
+    List<int> cardIds,
+  ) async {
+    final url = Uri.http(domain, '/api/playCard/$lobbyId/$playerId');
+    final body = json.encode({
+      "cardIds": cardIds,
+    });
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: body,
+      );
+
+      if (response.statusCode == 201) return true;
+      throw Failure(code: 2, message: "Bad request error.");
+    } on HttpException {
+      throw Failure(code: 1, message: "Looks like the service is unavailable.");
+    } on TimeoutException {
+      throw Failure(code: 1, message: "Server might be offline.");
+    } on SocketException {
+      throw Failure(code: 1, message: "Server might be offline.");
+    }
+  }
+
+  static Future<bool> voteWinner(
+    String lobbyId,
+    String playerId,
+    String votedPlayerId,
+  ) async {
+    final url = Uri.http(domain, '/api/voteWinner/$lobbyId/$playerId');
+    final body = json.encode({
+      "votedPlayerId": votedPlayerId,
+    });
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: body,
+      );
+
+      if (response.statusCode == 201) return true;
+      throw Failure(code: 2, message: "Bad request error.");
+    } on HttpException {
+      throw Failure(code: 1, message: "Looks like the service is unavailable.");
+    } on TimeoutException {
+      throw Failure(code: 1, message: "Server might be offline.");
+    } on SocketException {
+      throw Failure(code: 1, message: "Server might be offline.");
+    }
+  }
 }

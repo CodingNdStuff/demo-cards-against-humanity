@@ -19,6 +19,7 @@ class MqttClientWrapper with ChangeNotifier {
   StreamSubscription? subscription;
   Lobby? lobby;
   List<WhiteCard>? hand;
+  List<dynamic>? proposals;
 
   void _subscribeToTopic(String topic) {
     try {
@@ -75,6 +76,7 @@ class MqttClientWrapper with ChangeNotifier {
     subscription = client?.updates?.listen(_onMessage);
     _subscribeToTopic(topic);
     _subscribeToTopic("$topic/$playerId");
+    _subscribeToTopic("$topic/voting");
   }
 
   void _onMessage(List<MqttReceivedMessage> event) {
@@ -87,13 +89,31 @@ class MqttClientWrapper with ChangeNotifier {
 
     final lobbyJsonObject = jsonDecode(message);
     print(lobbyJsonObject);
-    if (topic.contains("/")) {
+    if (topic.contains("voting")) {
+      _handleProposalsUpdates(lobbyJsonObject);
+    } else if (topic.contains("/")) {
       _handleHandUpdates(lobbyJsonObject);
     } else {
       _handleLobbyUpdates(lobbyJsonObject, topic);
     }
 
     notifyListeners();
+  }
+
+  void _handleProposalsUpdates(List<dynamic> proposalsJsonObject) {
+    proposals = proposalsJsonObject.map(
+      (o) {
+        final List<dynamic> playedCardsObjects = o["playedCards"];
+        final cardList = playedCardsObjects
+            .map((c) => WhiteCard(c["id"], Uri.decodeComponent(c["text"])))
+            .toList();
+        return ({
+          "playerId": o["playerId"],
+          "playedCards": cardList,
+        });
+      },
+    ).toList();
+    print("proposals are done");
   }
 
   void _handleHandUpdates(List<dynamic> handJsonObject) {
@@ -179,13 +199,13 @@ class MqttClientWrapper with ChangeNotifier {
     //_onDisconnected();
   }
 
-  void placeCard(WhiteCard card, int position) {
-    lobby?.currentBlackCard?.placedCards.putIfAbsent(position, () => card);
+  void placeCard(WhiteCard card) {
+    lobby?.currentBlackCard?.placedCards.add(card);
     notifyListeners();
   }
 
   void takeCardsBack() {
-    lobby?.currentBlackCard?.placedCards.forEach((key, card) {
+    lobby?.currentBlackCard?.placedCards.forEach((card) {
       hand?.add(card);
     });
     lobby?.currentBlackCard?.placedCards.clear();

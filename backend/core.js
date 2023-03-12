@@ -116,6 +116,7 @@ _startVoting = function (currentLobbyData) {
     currentLobbyData.status = Statuses.voting;
     currentLobbyData.resetAllPlayerReady();
     console.log(currentLobbyData.round.playedCards);
+    publishEncoded(currentLobbyData.id, currentLobbyData.getOngoingLobbyData());
     publishEncoded(currentLobbyData.id + "/voting", currentLobbyData.round.playedCards);
 }
 
