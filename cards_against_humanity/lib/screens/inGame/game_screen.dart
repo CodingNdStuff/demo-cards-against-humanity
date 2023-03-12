@@ -1,6 +1,7 @@
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/models/lobby.dart';
 import 'package:cards_against_humanity/screens/inGame/card_proposals.dart';
+import 'package:cards_against_humanity/screens/inGame/end_round_display.dart';
 import 'package:cards_against_humanity/screens/inGame/hand.dart';
 import 'package:cards_against_humanity/screens/inGame/table.dart';
 import 'package:cards_against_humanity/screens/inGame/players_list.dart';
@@ -14,12 +15,17 @@ class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final phase = Provider.of<MqttClientWrapper>(context).lobby?.phase;
-    if (phase == status.play) {
-      return const OngoingPlayLobby();
-    } else if (phase == status.voting) {
-      return const OngoingVotingLobby();
+    switch (phase) {
+      case status.play:
+        return const OngoingPlayLobby();
+      case status.voting:
+        return const OngoingVotingLobby();
+      case status.prep:
+      case status.closed:
+        return const OngoingRoundEndLobby();
+      default:
+        return Container();
     }
-    return Container();
   }
 }
 
@@ -68,6 +74,22 @@ class OngoingVotingLobby extends StatelessWidget {
         width: MediaQuery.of(context).size.width,
         color: Theme.of(context).colorScheme.background,
         child: const CardProposals(),
+      ),
+    );
+  }
+}
+
+class OngoingRoundEndLobby extends StatelessWidget {
+  const OngoingRoundEndLobby({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        color: Theme.of(context).colorScheme.background,
+        child: const EndRoundDisplay(),
       ),
     );
   }

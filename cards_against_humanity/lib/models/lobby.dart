@@ -32,4 +32,8 @@ class Lobby {
   bool isMyTurn(String userId) {
     return players.firstWhere((p) => p.id == userId).isMyTurn;
   }
+
+  Player whoOwnsToken() {
+    return players.firstWhere((p) => p.isMyTurn);
+  }
 }

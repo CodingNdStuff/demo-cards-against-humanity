@@ -103,7 +103,8 @@ module.exports = class Lobby {
     }
 
     nextBlackCard(){
-        this.currentBlackCard=this.deck.drawBlackCard;
+        this.round.currentBlackCard=this.deck.drawBlackCard;
+        this.round.playedCards=[];
     }
 
     refillHands(){

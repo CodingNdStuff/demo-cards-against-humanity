@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cards_against_humanity/helpers/api_change_notifier.dart';
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/models/black_card.dart';
 import 'package:cards_against_humanity/models/user.dart';
@@ -12,10 +13,16 @@ class CardProposals extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final providedData = Provider.of<MqttClientWrapper>(context);
-    final userData = Provider.of<User>(context, listen: false);
+    final userId = Provider.of<User>(context, listen: false).playerData.id;
     final lobby = providedData.lobby!;
     final proposals = providedData.proposals!;
-    final isMyTurn = lobby.isMyTurn(userData.playerData.id);
+    final isMyTurn = lobby.isMyTurn(userId);
+    void handleVote(String votedPlayerId) {
+      final notifier = Provider.of<ApiChangeNotifier>(context, listen: false);
+      notifier.reset();
+      notifier.voteWinner(lobby.id, userId, votedPlayerId);
+    }
+
     return Container(
       alignment: Alignment.center,
       color: Colors.amber,
@@ -28,6 +35,7 @@ class CardProposals extends StatelessWidget {
                     cardList: prop["playedCards"],
                     currentBlackCard: lobby.currentBlackCard!,
                     isMyTurn: isMyTurn,
+                    handleVote: handleVote,
                   ))
               .toList(),
         ],
@@ -43,11 +51,13 @@ class ProposalCard extends StatelessWidget {
     required this.cardList,
     required this.currentBlackCard,
     required this.isMyTurn,
+    required this.handleVote,
   });
   final String playerId;
   final List<WhiteCard> cardList;
   final BlackCard currentBlackCard;
   final bool isMyTurn;
+  final Function handleVote;
 
   String parseText() {
     String parsed = currentBlackCard.text;
@@ -86,7 +96,7 @@ class ProposalCard extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: isMyTurn ? () {} : null,
+              onPressed: isMyTurn ? () => handleVote(playerId) : null,
               child: const Text("Vote this one!"),
             ),
           ],

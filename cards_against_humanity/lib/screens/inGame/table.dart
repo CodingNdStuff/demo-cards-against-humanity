@@ -12,7 +12,10 @@ class TableWidget extends StatelessWidget {
     final playerData = Provider.of<User>(context, listen: false).playerData;
     final lobbyData =
         Provider.of<MqttClientWrapper>(context, listen: false).lobby!;
-    Provider.of<ApiChangeNotifier>(context, listen: false).playCard(
+
+    final notifier = Provider.of<ApiChangeNotifier>(context, listen: false);
+    notifier.reset();
+    notifier.playCard(
         lobbyData.id, playerData.id, lobbyData.currentBlackCard!.placedCards);
   }
 
