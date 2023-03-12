@@ -44,8 +44,7 @@ class MyApp extends StatelessWidget {
           LobbyScreen.routeName: (ctx) => const LobbyScreen(),
           GameScreen.routeName: (ctx) => const GameScreen(),
         },
-        initialRoute: LobbyEnteringScreen.routeName,
-        // initialRoute: GameScreen.routeName,
+        initialRoute: HomeScreen.routeName,
       ),
     );
   }

@@ -1,7 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
+import 'package:cards_against_humanity/models/user.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 class Hand extends StatelessWidget {
@@ -9,19 +9,20 @@ class Hand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MqttWrapper = Provider.of<MqttClientWrapper>(context);
-    final hand = MqttWrapper.hand!;
-    final numberOfBlanks = MqttWrapper.lobby!.currentBlackCard!.numberOfBlanks;
-    final currentBlackCard = MqttWrapper.lobby!.currentBlackCard!;
+    final mqttWrapper = Provider.of<MqttClientWrapper>(context);
+    final userData = Provider.of<User>(context, listen: false);
+    final hand = mqttWrapper.hand!;
+    final lobby = mqttWrapper.lobby!;
+    final numberOfBlanks = lobby.currentBlackCard!.numberOfBlanks;
+    final currentBlackCard = lobby.currentBlackCard!;
+    final isMyTurn = lobby.isMyTurn(userData.playerData.id);
     bool canAdd() {
       return currentBlackCard.placedCards.length < numberOfBlanks;
     }
 
     void placeCard(double index) {
-      MqttWrapper.placeCard(hand.singleWhere((c) => c.id == index));
+      mqttWrapper.placeCard(hand.singleWhere((c) => c.id == index));
       hand.removeWhere((c) => c.id == index);
-      print("Played card");
-      print(MqttWrapper.lobby!.currentBlackCard);
     }
 
     return SizedBox(
@@ -29,24 +30,33 @@ class Hand extends StatelessWidget {
       height: 150,
       child: ScrollConfiguration(
         behavior: _MyBehavior(),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              ...hand
-                  .map(
-                    (e) => CardItem(
-                        key: ValueKey(e.id),
-                        text: e.text,
-                        index: e.id.toDouble(),
-                        canAdd: canAdd,
-                        placeCard: placeCard),
-                  )
-                  .toList(),
-            ],
-          ),
-        ),
+        child: isMyTurn
+            ? Container(
+                alignment: Alignment.center,
+                child: Text(
+                  textAlign: TextAlign.center,
+                  "Wait for the players to pick . . .",
+                  style: Theme.of(context).textTheme.headline4,
+                ),
+              )
+            : SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    ...hand
+                        .map(
+                          (e) => CardItem(
+                              key: ValueKey(e.id),
+                              text: e.text,
+                              index: e.id.toDouble(),
+                              canAdd: canAdd,
+                              placeCard: placeCard),
+                        )
+                        .toList(),
+                  ],
+                ),
+              ),
       ),
     );
   }
@@ -114,16 +124,5 @@ class _CardItemState extends State<CardItem> {
             ),
           )),
     );
-  }
-
-  void _handlePlayCard(double cardId) async {
-    print("played");
-    // final playerData = Provider.of<User>(context, listen: false).playerData;
-    // await API.setPlayerReady(lobbyId, playerData.id).then((success) {
-    //   if (!success) return;
-    //   setState(() {
-    //     isReady = true;
-    //   });
-    // });
   }
 }

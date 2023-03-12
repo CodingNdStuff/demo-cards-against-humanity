@@ -28,4 +28,8 @@ class Lobby {
       required this.maxRoundNumber,
       required this.players,
       this.phase = status.open});
+
+  bool isMyTurn(String userId) {
+    return players.firstWhere((p) => p.id == userId).isMyTurn;
+  }
 }
