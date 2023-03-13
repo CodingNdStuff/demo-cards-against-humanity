@@ -90,5 +90,5 @@ const _updateLobbyAfterDisconnect = function (playerId) {
     //         return lobbyId;
     //     }
     // }
-    console.log("user $playerId disconnected");
+    console.log("user "+playerId+" disconnected");
 }

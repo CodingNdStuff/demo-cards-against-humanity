@@ -11,7 +11,7 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
 class MqttClientWrapper with ChangeNotifier {
-  String broker = 'ws://10.0.2.2';
+  String broker = 'ws://demo-cau.ddns.net';
   int port = 8080;
   // String clientIdentifier = 'android';
   static MqttServerClient? client;
@@ -60,7 +60,8 @@ class MqttClientWrapper with ChangeNotifier {
       await client!.connect(playerId);
     } catch (e) {
       print(e);
-      disconnect(playerId);
+      disconnect();
+      return;
     }
 
     /// Check if we are connected
@@ -70,7 +71,8 @@ class MqttClientWrapper with ChangeNotifier {
     } else {
       print('[MQTT client] ERROR: MQTT client connection failed - '
           'disconnecting, state is ${client?.connectionStatus?.state}');
-      disconnect(playerId);
+      disconnect();
+      return;
     }
 
     subscription = client?.updates?.listen(_onMessage);
@@ -198,9 +200,9 @@ class MqttClientWrapper with ChangeNotifier {
     client?.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!);
   }
 
-  void disconnect(String playerId) {
+  void disconnect() {
     print('[MQTT client] _disconnect()');
-    _publish("${lobby?.id}/willmsg", json.encode(playerId));
+    // _publish("${lobby?.id}/willmsg", json.encode(playerId));
     client?.disconnect();
     //_onDisconnected();
   }

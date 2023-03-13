@@ -7,6 +7,7 @@ import 'package:cards_against_humanity/models/player.dart';
 import 'package:cards_against_humanity/models/user.dart';
 import 'package:cards_against_humanity/screens/home/home_screen.dart';
 import 'package:cards_against_humanity/screens/inGame/game_screen.dart';
+import 'package:cards_against_humanity/screens/inGame/post_game_screen.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_creation_screen.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_entering_screen.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_screen.dart';
@@ -30,8 +31,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: ((context) => MqttClientWrapper())),
         ChangeNotifierProvider(
             create: ((context) => User(
-                playerData:
-                    Player("1", "player-${Random().nextInt(100000)}")))),
+                playerData: Player(Random().nextInt(100000).toString(),
+                    "player-${Random().nextInt(100000)}")))),
         ChangeNotifierProvider(create: ((context) => ApiChangeNotifier())),
       ],
       child: MaterialApp(
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
           LobbyEnteringScreen.routeName: (ctx) => const LobbyEnteringScreen(),
           LobbyScreen.routeName: (ctx) => const LobbyScreen(),
           GameScreen.routeName: (ctx) => const GameScreen(),
+          PostGameScreen.routeName: (ctx) => const PostGameScreen(),
         },
         initialRoute: HomeScreen.routeName,
       ),

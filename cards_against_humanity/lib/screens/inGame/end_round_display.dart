@@ -1,10 +1,12 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cards_against_humanity/helpers/api_change_notifier.dart';
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
+import 'package:cards_against_humanity/models/lobby.dart';
 import 'package:cards_against_humanity/models/player.dart';
 import 'package:cards_against_humanity/models/user.dart';
 import 'package:cards_against_humanity/models/white_card.dart';
 import 'package:cards_against_humanity/screens/inGame/game_components/black_card_item.dart';
+import 'package:cards_against_humanity/screens/inGame/post_game_screen.dart';
 import 'package:cards_against_humanity/utils/text_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,8 +28,10 @@ class _EndRoundDisplayState extends State<EndRoundDisplay> {
     final proposals = providedData.proposals!;
 
     void handleReady() {
+      if (lobby.phase == status.closed) {
+        Navigator.of(context).pushReplacementNamed(PostGameScreen.routeName);
+      }
       final notifier = Provider.of<ApiChangeNotifier>(context, listen: false);
-
       notifier.setPlayerReady(lobby.id, userId);
       notifier.reset();
       setState(() {

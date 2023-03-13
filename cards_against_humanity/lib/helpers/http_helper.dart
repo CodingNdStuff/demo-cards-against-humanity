@@ -7,7 +7,7 @@ import 'package:cards_against_humanity/exceptions/connection_exception.dart';
 import 'package:http/http.dart' as http;
 
 abstract class API {
-  static const domain = "10.0.2.2:3001";
+  static const domain = "demo-cau.ddns.net:3001";
   static Future<bool> enterLobby(
     String lobbyId,
     String playerId,
