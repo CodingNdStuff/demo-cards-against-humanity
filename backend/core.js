@@ -131,6 +131,9 @@ _prep = function (currentLobbyData) {
         currentLobbyData.resetAllPlayerReady();
         currentLobbyData.refillHands();
         currentLobbyData.nextBlackCard();
+        currentLobbyData.playerList.forEach(p => {
+            publishEncoded(currentLobbyData.id + "/" + p.id, p.hand);
+        });
     }
     publishEncoded(currentLobbyData.id, currentLobbyData.getOngoingLobbyData());
 }
