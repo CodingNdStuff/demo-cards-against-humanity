@@ -158,6 +158,7 @@ class MqttClientWrapper with ChangeNotifier {
 
   void _updateOngoingLobby(lobbyJsonObject, lobbyId) {
     print("updating ongoing");
+    final oldLobby = lobby;
     List<dynamic> playerListObject =
         lobbyJsonObject["players"] as List<dynamic>;
     List<Player> playerList = playerListObject
@@ -169,12 +170,17 @@ class MqttClientWrapper with ChangeNotifier {
               e["isMyTurn"] as bool,
             ))
         .toList();
-    print(playerList);
-    BlackCard card = BlackCard(
-        lobbyJsonObject["currentBlackCard"]["id"] as int,
-        Uri.decodeComponent(lobbyJsonObject["currentBlackCard"]["text"]),
-        lobbyJsonObject["currentBlackCard"]["numberOfBlanks"] as int);
-    print(card);
+    BlackCard card;
+    if (oldLobby?.currentBlackCard?.id ==
+        lobbyJsonObject["currentBlackCard"]["id"]) {
+      //insensitive to lobby variations when the black card is not involved
+      card = oldLobby!.currentBlackCard!;
+    } else {
+      card = BlackCard(
+          lobbyJsonObject["currentBlackCard"]["id"] as int,
+          Uri.decodeComponent(lobbyJsonObject["currentBlackCard"]["text"]),
+          lobbyJsonObject["currentBlackCard"]["numberOfBlanks"] as int);
+    }
     lobby = Lobby(
       id: lobbyId,
       roundDuration: lobbyJsonObject["roundDuration"] as int,

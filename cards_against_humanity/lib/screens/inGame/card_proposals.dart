@@ -4,6 +4,7 @@ import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/models/black_card.dart';
 import 'package:cards_against_humanity/models/user.dart';
 import 'package:cards_against_humanity/models/white_card.dart';
+import 'package:cards_against_humanity/utils/text_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,7 +31,7 @@ class CardProposals extends StatelessWidget {
           child: Row(
         children: [
           ...proposals
-              .map((prop) => ProposalCard(
+              .map((prop) => CardProposalsItem(
                     playerId: prop["playerId"],
                     cardList: prop["playedCards"],
                     currentBlackCard: lobby.currentBlackCard!,
@@ -44,8 +45,8 @@ class CardProposals extends StatelessWidget {
   }
 }
 
-class ProposalCard extends StatelessWidget {
-  const ProposalCard({
+class CardProposalsItem extends StatelessWidget {
+  const CardProposalsItem({
     super.key,
     required this.playerId,
     required this.cardList,
@@ -58,19 +59,6 @@ class ProposalCard extends StatelessWidget {
   final BlackCard currentBlackCard;
   final bool isMyTurn;
   final Function handleVote;
-
-  String parseText() {
-    String parsed = currentBlackCard.text;
-    cardList.forEach((card) {
-      // Find the position of the underscore
-      int underscorePos = parsed.indexOf("_");
-
-      // Replace the "_" at the position with the value from the entry
-      parsed = parsed.replaceRange(underscorePos, underscorePos + 1,
-          card.text.replaceAll(".", "")); // occasionally they might have dots.
-    });
-    return parsed.replaceAll("_", "_______");
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +79,7 @@ class ProposalCard extends StatelessWidget {
               child: AutoSizeText(
                 maxLines: 5,
                 wrapWords: false,
-                parseText(),
+                TextParser.parse(currentBlackCard.text, cardList),
                 style: Theme.of(context).textTheme.headline3,
               ),
             ),

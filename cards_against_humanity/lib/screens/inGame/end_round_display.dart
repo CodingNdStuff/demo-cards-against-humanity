@@ -4,12 +4,20 @@ import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/models/player.dart';
 import 'package:cards_against_humanity/models/user.dart';
 import 'package:cards_against_humanity/models/white_card.dart';
+import 'package:cards_against_humanity/screens/inGame/game_components/black_card_item.dart';
+import 'package:cards_against_humanity/utils/text_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class EndRoundDisplay extends StatelessWidget {
+class EndRoundDisplay extends StatefulWidget {
   const EndRoundDisplay({super.key});
 
+  @override
+  State<EndRoundDisplay> createState() => _EndRoundDisplayState();
+}
+
+class _EndRoundDisplayState extends State<EndRoundDisplay> {
+  bool _isReady = false;
   @override
   Widget build(BuildContext context) {
     final providedData = Provider.of<MqttClientWrapper>(context);
@@ -19,52 +27,53 @@ class EndRoundDisplay extends StatelessWidget {
 
     void handleReady() {
       final notifier = Provider.of<ApiChangeNotifier>(context, listen: false);
-      notifier.reset();
+
       notifier.setPlayerReady(lobby.id, userId);
-    }
-
-    String parseText() {
-      final Player winner = lobby.whoOwnsToken();
-      final List<WhiteCard> winningProposal = proposals
-          .firstWhere((p) => p["playerId"] == winner.id)["playedCards"];
-      String parsed = lobby.currentBlackCard!.text;
-      winningProposal.forEach((card) {
-        // Find the position of the underscore
-        int underscorePos = parsed.indexOf("_");
-
-        // Replace the "_" at the position with the value from the entry
-        parsed = parsed.replaceRange(
-            underscorePos,
-            underscorePos + 1,
-            card.text
-                .replaceAll(".", "")); // occasionally they might have dots.
+      notifier.reset();
+      setState(() {
+        _isReady = true;
       });
-      return parsed.replaceAll("_", "_______");
     }
 
+    final Player winner = lobby.whoOwnsToken();
+    final List<WhiteCard> winningProposal =
+        proposals.firstWhere((p) => p["playerId"] == winner.id)["playedCards"];
     return Container(
+      padding: const EdgeInsets.only(
+        top: 16,
+      ),
       height: 300,
       width: 400,
       color: Colors.blueAccent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text("WINNER IS"),
-          Container(
-            height: MediaQuery.of(context).size.height * 0.6,
-            width: MediaQuery.of(context).size.width * 0.65,
-            margin: EdgeInsets.all(MediaQuery.of(context).size.width * 0.025),
-            padding: const EdgeInsets.all(15),
-            color: Colors.black,
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height * 0.4,
-              child: AutoSizeText(
-                maxLines: 5,
-                wrapWords: false,
-                parseText(),
-                style: Theme.of(context).textTheme.headline3,
-              ),
+          Text(
+            "WINNER IS",
+            style: Theme.of(context).textTheme.headline1,
+          ),
+          BlackCardItem(
+            displayText: TextParser.parse(
+              lobby.currentBlackCard?.text ?? "",
+              winningProposal,
             ),
+            action: _isReady
+                ? const ElevatedButton(
+                    onPressed: null,
+                    style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStatePropertyAll<Color>(Colors.black)),
+                    child: Text(
+                      "Waiting for the others . . .",
+                      style: TextStyle(color: Colors.amber),
+                    ),
+                  )
+                : ElevatedButton(
+                    onPressed: () => handleReady(),
+                    child: const Text(
+                      "I'm ready!",
+                    ),
+                  ),
           ),
         ],
       ),

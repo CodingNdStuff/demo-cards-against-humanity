@@ -2,9 +2,9 @@ import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/models/lobby.dart';
 import 'package:cards_against_humanity/screens/inGame/card_proposals.dart';
 import 'package:cards_against_humanity/screens/inGame/end_round_display.dart';
-import 'package:cards_against_humanity/screens/inGame/hand.dart';
-import 'package:cards_against_humanity/screens/inGame/table.dart';
-import 'package:cards_against_humanity/screens/inGame/players_list.dart';
+import 'package:cards_against_humanity/screens/inGame/game_components/hand.dart';
+import 'package:cards_against_humanity/screens/inGame/game_components/table.dart';
+import 'package:cards_against_humanity/screens/inGame/game_components/players_list.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -40,7 +40,6 @@ class OngoingPlayLobby extends StatelessWidget {
         width: MediaQuery.of(context).size.width,
         color: Theme.of(context).colorScheme.background,
         child: Stack(
-          // alignment: Alignment.bottomCenter,
           children: [
             const Positioned(
               right: 0,

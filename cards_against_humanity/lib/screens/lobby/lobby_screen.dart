@@ -4,6 +4,7 @@ import 'package:cards_against_humanity/models/lobby.dart';
 import 'package:cards_against_humanity/models/user.dart';
 import 'package:cards_against_humanity/screens/inGame/game_screen.dart';
 import 'package:cards_against_humanity/widgets/custom_layouts.dart';
+import 'package:cards_against_humanity/widgets/error_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
@@ -75,14 +76,26 @@ class _LobbyScreenState extends State<LobbyScreen> {
           height: 10,
         ),
         ElevatedButton(
-          onPressed: isReady ? null : () => _handleReady(lobbyData?.id ?? ""),
+          onPressed: isReady
+              ? null
+              : () => _handleReady(
+                    lobbyData?.players.length ?? 0,
+                    lobbyData?.id ?? "",
+                  ),
           child: const Text("I'm ready!"),
         ),
       ], context);
     }
   }
 
-  void _handleReady(String lobbyId) async {
+  void _handleReady(int playersInLobby, String lobbyId) async {
+    if (playersInLobby < 2) {
+      return showDialog(
+        context: context,
+        builder: (context) => const ErrorDialog(
+            title: "You fool", content: "Need at least 2 players to play!"),
+      );
+    }
     final playerData = Provider.of<User>(context, listen: false).playerData;
     await API.setPlayerReady(lobbyId, playerData.id).then((success) {
       if (!success) return;

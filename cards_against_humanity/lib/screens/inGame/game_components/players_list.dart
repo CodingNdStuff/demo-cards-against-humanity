@@ -1,5 +1,5 @@
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
-import 'package:cards_against_humanity/screens/inGame/players_list_item.dart';
+import 'package:cards_against_humanity/screens/inGame/game_components/players_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
