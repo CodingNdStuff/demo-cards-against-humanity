@@ -1,8 +1,8 @@
 const mqtt = require('mqtt');
 const Deck = require('../card_management/cards');
+const core = require('../core');
 const clientId = 'mqttjs_server'// + Math.random().toString(16).substr(2, 8);
 const host = 'ws://localhost:8080';
-
 var options = {
     keepalive: 30,
     clientId: clientId,
@@ -42,8 +42,7 @@ client.on('close', function () {
 })
 
 client.on('message', (topic, message) => {
-    const playerId = JSON.parse(message);
-    _updateLobbyAfterDisconnect(playerId);
+    _updateLobbyAfterDisconnect(message);
 });
 
 //
@@ -73,22 +72,14 @@ exports.publishEncodedNoRetain = function (topic, genericObject) {
 
 exports.publishEmpty = function (topic) {
     if (client.disconnected) throw 500;
-    client.publish(topic, "" , { retain: true });
+    client.publish(topic, null , { retain: true });
 }
 
 
 
-const _updateLobbyAfterDisconnect = function (playerId) {
-    // for (let [lobbyId, lobby] of lobbies) {
-    //     let playerIndex = lobby.players.findIndex(player => player.id === playerId);
-    //     if (playerIndex !== -1) {
-    //         lobby.players.splice(playerIndex, 1);
-    //         if (lobby.players.length === 0) {
-    //             lobbies.delete(lobbyId);
-    //         }
-    //         client.publish(lobbyId, "", { retain: false });
-    //         return lobbyId;
-    //     }
-    // }
-    console.log("user "+playerId+" disconnected");
+const _updateLobbyAfterDisconnect = function (message) {
+    let [lobbyId, playerId] = JSON.parse(message).split("/");
+    console.log("user "+playerId+" disconnected from lobby "+lobbyId); //to be removed
+    if(playerId == undefined) playerId=lobbyId //to be removed
+    core.handleDisconnection("4jjjnpe6", playerId); //to be edited
 }

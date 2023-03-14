@@ -57,6 +57,14 @@ module.exports = class Lobby {
         this.playerList.set(playerId, new Player(playerId, nickname));
     }
 
+    removePlayer(playerId){
+        this.playerList.delete(playerId);
+    }
+
+    getOnlinePlayersCount(){
+        return this.playerList.size;
+    }
+
     setPlayerReady(playerId){
         const player = this.playerList.get(playerId);
         if(player == undefined) throw 404
@@ -116,6 +124,14 @@ module.exports = class Lobby {
             for(i=0; i<missing; i++)
                 p.hand.push(this.deck.drawWhiteCard); 
         })
+    }
+
+    getTurnHolder(){
+        let id;
+        this.playerList.forEach((p)=>{
+            if(p.isMyTurn) id=p.id;
+        })
+        return id;
     }
 }
 

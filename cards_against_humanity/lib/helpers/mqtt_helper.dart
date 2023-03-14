@@ -48,7 +48,7 @@ class MqttClientWrapper with ChangeNotifier {
         .startClean() // Non persistent session for testing
         .withWillQos(MqttQos.atMostOnce)
         .withWillTopic("willTopic")
-        .withWillMessage(json.encode(playerId))
+        .withWillMessage(json.encode("$topic/$playerId"))
         .withWillQos(MqttQos.atMostOnce);
     print('[MQTT client] MQTT client connecting....');
     client?.connectionMessage = connMess;

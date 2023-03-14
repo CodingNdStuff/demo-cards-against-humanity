@@ -115,10 +115,21 @@ _startVoting = function (currentLobbyData) {
     console.log("Voting");
     currentLobbyData.status = Statuses.voting;
     currentLobbyData.resetAllPlayerReady();
-    console.log(currentLobbyData.round.playedCards);
+    let shuffledArray= _shuffleArray(currentLobbyData.round.playedCards);
+    console.log(shuffledArray);
     publishEncoded(currentLobbyData.id, currentLobbyData.getOngoingLobbyData());
-    publishEncoded(currentLobbyData.id + "/voting", currentLobbyData.round.playedCards);
+    publishEncoded(currentLobbyData.id + "/voting", shuffledArray);
+
+    _checkVotingHostDisconnection(currentLobbyData);
 }
+
+_shuffleArray = function (array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
 
 _prep = function (currentLobbyData) {
     if(currentLobbyData.status == Statuses.voting){
@@ -148,4 +159,42 @@ _close = function (currentLobbyData) {
     });
     publishEmpty(currentLobbyData.id + "/voting");
     lobbies.delete(currentLobbyData.id);
+}
+
+
+// handling disconnections
+
+exports.handleDisconnection = (lobbyId, playerId)=> {
+    console.log(lobbyId)
+    console.log(playerId)
+    if(lobbyId==undefined || playerId == undefined) return;
+    const currentLobbyData = lobbies.get(lobbyId);
+    if (currentLobbyData == undefined) return; //lobby already gone
+    currentLobbyData.removePlayer(playerId);
+    publishEmpty(currentLobbyData.id + "/" + playerId);
+    console.log(currentLobbyData.playerList)
+    console.log("count "+currentLobbyData.getOnlinePlayersCount())
+    if ( currentLobbyData.getOnlinePlayersCount() < 2) {
+        _close(currentLobbyData);
+    }
+}
+
+_checkVotingHostDisconnection = function (currentLobbyData){ //if the holder of the token disconnects,
+    if(currentLobbyData.getTurnHolder() != undefined) return;
+
+    const core = require('./core');
+    //artificially create a player voting itself
+    let index = Math.floor(Math.random()*currentLobbyData.playerList.size);
+
+    const mapIterator = currentLobbyData.playerList.values()
+    for(let i=0;i<index;i++)
+    mapIterator.next();
+    player = mapIterator.next().value
+    console.log(player);
+    player.isMyTurn=true;
+
+    setTimeout(function() {
+        core.voteWinner(currentLobbyData.id, player.id, player.id);
+    }, 10000);
+     
 }
