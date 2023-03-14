@@ -49,14 +49,104 @@ class _LobbyScreenState extends State<LobbyScreen> {
       ], context);
     } else {
       if (!(lobbyData!.phase == status.open)) _handleStartGame();
-      return CustomLayouts.mainLayout([
-        Text("Lobby code: ${lobbyData?.id}"),
-        Text("duration: ${lobbyData?.roundDuration}"),
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.background,
+          foregroundColor: Theme.of(context).colorScheme.secondary,
+          elevation: 0,
+          // todo: allow people to join / leave and handle destroy lobby
+          // leading: IconButton(
+          //   onPressed: () {},
+          //   icon: const Icon(Icons.arrow_back),
+          // ),
+        ),
+        body: Stack(
+          children: [
+            Container(
+              width: double.infinity,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.background),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Lobby code: ${lobbyData?.id}",
+                      style: Theme.of(context).textTheme.headline1,
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.4,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: GridView(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 2,
+                          childAspectRatio: 4 / 2,
+                        ),
+                        children: [
+                          ...?lobbyData?.players.map(
+                            (e) => PlayerInLobbyListItem(
+                                playerName: e.nickname, ready: e.isReady),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    ElevatedButton(
+                      onPressed: isReady
+                          ? null
+                          : () => _handleReady(
+                                lobbyData?.players.length ?? 0,
+                                lobbyData?.id ?? "",
+                              ),
+                      child: const Text("I'm ready!"),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    "Number of rounds: ${lobbyData?.maxRoundNumber}",
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                  const Text(
+                    "Minimum players: 2",
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                  Text(
+                    "Round duration: ${lobbyData?.roundDuration}",
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+
+      CustomLayouts.mainLayout([
+        Text(
+          "Lobby code: ${lobbyData?.id}",
+          style: Theme.of(context).textTheme.headline1,
+        ),
         const SizedBox(
           height: 10,
         ),
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.5,
+          height: MediaQuery.of(context).size.height * 0.4,
           width: MediaQuery.of(context).size.width * 0.7,
           child: GridView(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -69,6 +159,17 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 (e) => PlayerInLobbyListItem(
                     playerName: e.nickname, ready: e.isReady),
               ),
+            ],
+          ),
+        ),
+        Positioned(
+          bottom: 10,
+          right: 10,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text("Number of rounds: ${lobbyData?.maxRoundNumber}"),
+              Text("Round duration: ${lobbyData?.roundDuration}"),
             ],
           ),
         ),

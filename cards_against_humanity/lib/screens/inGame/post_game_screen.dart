@@ -1,7 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/screens/home/home_screen.dart';
-import 'package:cards_against_humanity/widgets/custom_layouts.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,8 +16,8 @@ class PostGameScreen extends StatelessWidget {
     final players = lobby.players;
     players.sort(((a, b) => b.score - a.score));
     final numberOfPlayers = players.length;
-
-    void _handleNavigateHome() {
+    final maxScore = players[0].score;
+    void handleNavigateHome() {
       providedData.disconnect();
       Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
     }
@@ -43,50 +42,27 @@ class PostGameScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
-                      child: Column(
-                        children: [
-                          AutoSizeText(
-                              maxLines: 1,
-                              players[1].nickname,
-                              softWrap: false,
-                              style: Theme.of(context).textTheme.headline1),
-                          PodiumItem(
-                            heightFactor: 0.6,
-                            score: players[1].score,
-                          ),
-                        ],
+                      child: ComposedPodium(
+                        nickname: players[1].nickname,
+                        score: players[1].score,
+                        maxScore: maxScore,
                       ),
                     ),
                     Expanded(
-                      child: Column(
-                        children: [
-                          AutoSizeText(
-                              maxLines: 1,
-                              players[0].nickname,
-                              softWrap: false,
-                              style: Theme.of(context).textTheme.headline1),
-                          PodiumItem(
-                            heightFactor: 1,
-                            score: players[0].score,
-                          ),
-                        ],
+                      child: ComposedPodium(
+                        nickname: players[0].nickname,
+                        score: players[0].score,
+                        maxScore: maxScore,
                       ),
                     ),
                     Expanded(
-                      child: Column(
-                        children: [
-                          AutoSizeText(
-                              maxLines: 1,
-                              wrapWords: false,
-                              players[2].nickname,
-                              softWrap: false,
-                              style: Theme.of(context).textTheme.headline1),
-                          PodiumItem(
-                            heightFactor: 0.4,
-                            score: players[2].score,
-                          ),
-                        ],
-                      ),
+                      child: numberOfPlayers < 3
+                          ? Container()
+                          : ComposedPodium(
+                              nickname: players[2].nickname,
+                              score: players[2].score,
+                              maxScore: maxScore,
+                            ),
                     ),
                   ],
                 )),
@@ -94,7 +70,7 @@ class PostGameScreen extends StatelessWidget {
               height: 20,
             ),
             ElevatedButton(
-              onPressed: () => _handleNavigateHome(),
+              onPressed: () => handleNavigateHome(),
               child: const Text("Back to home"),
             ),
           ],
@@ -104,8 +80,38 @@ class PostGameScreen extends StatelessWidget {
   }
 }
 
-class PodiumItem extends StatelessWidget {
-  const PodiumItem({
+class ComposedPodium extends StatelessWidget {
+  const ComposedPodium({
+    super.key,
+    required this.nickname,
+    required this.score,
+    required this.maxScore,
+  });
+  final String nickname;
+  final int score;
+  final int maxScore;
+
+  @override
+  Widget build(BuildContext context) {
+    final heightFactor = score / maxScore;
+    return Column(
+      children: [
+        AutoSizeText(
+            maxLines: 1,
+            nickname,
+            softWrap: false,
+            style: Theme.of(context).textTheme.headline1),
+        PodiumElement(
+          heightFactor: heightFactor,
+          score: score,
+        ),
+      ],
+    );
+  }
+}
+
+class PodiumElement extends StatelessWidget {
+  const PodiumElement({
     super.key,
     required this.heightFactor,
     required this.score,
@@ -151,36 +157,6 @@ class PodiumItem extends StatelessWidget {
                 ?.copyWith(color: Colors.white70, fontSize: 32),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class PostGamePlayer extends StatelessWidget {
-  const PostGamePlayer({
-    super.key,
-    required this.nickname,
-    required this.score,
-    required this.scaleFactor,
-    required this.numberOfPlayers,
-  });
-  final String nickname;
-  final int score;
-  final double scaleFactor;
-  final int numberOfPlayers;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: Colors.amber),
-      width: MediaQuery.of(context).size.width * 0.7 * scaleFactor,
-      child: ListTile(
-        leading: const CircleAvatar(
-          child: Icon(Icons.person),
-        ),
-        title: Text(nickname),
-        subtitle: Text("$score pts"),
       ),
     );
   }

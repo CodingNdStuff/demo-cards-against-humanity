@@ -48,7 +48,8 @@ class _EndRoundDisplayState extends State<EndRoundDisplay> {
       ),
       height: 300,
       width: 400,
-      color: Colors.blueAccent,
+      decoration:
+          BoxDecoration(color: Theme.of(context).colorScheme.background),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

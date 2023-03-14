@@ -192,6 +192,8 @@ class MqttClientWrapper with ChangeNotifier {
       currentBlackCard: card,
       phase: status.values.byName(lobbyJsonObject["status"]),
     );
+
+    if (lobby?.phase == status.closed) disconnect();
   }
 
   void _publish(String topic, String message) {
