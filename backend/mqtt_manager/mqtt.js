@@ -80,6 +80,5 @@ exports.publishEmpty = function (topic) {
 const _updateLobbyAfterDisconnect = function (message) {
     let [lobbyId, playerId] = JSON.parse(message).split("/");
     console.log("user "+playerId+" disconnected from lobby "+lobbyId); //to be removed
-    if(playerId == undefined) playerId=lobbyId //to be removed
-    core.handleDisconnection("4jjjnpe6", playerId); //to be edited
+    core.handleDisconnection(lobbyId, playerId);
 }

@@ -8,7 +8,7 @@ let lobbies = new Map();
 exports.createLobby = function (id, nickname, roundDuration, maxRoundNumber) {
     // const newLobbyId = _generateUniqueId(lobbies)
 
-    const newLobbyId = "4jjjnpe6";
+    const newLobbyId = _generateUniqueId(lobbies);
     const newLobby = new Lobby(newLobbyId, id, nickname, roundDuration, maxRoundNumber);
     lobbies.set(newLobbyId, newLobby);
     publishEncoded(newLobbyId, newLobby.getOpenLobbyData());
@@ -18,6 +18,7 @@ exports.createLobby = function (id, nickname, roundDuration, maxRoundNumber) {
 exports.joinLobby = function (lobbyId, playerId, nickname) {
     const currentLobbyData = lobbies.get(lobbyId)
     if (currentLobbyData == undefined) throw 404;
+    if (!(currentLobbyData.status == Statuses.open)) throw 403;
     currentLobbyData.addPlayer(playerId, nickname);
     publishEncoded(lobbyId, currentLobbyData.getOpenLobbyData());
 }
@@ -83,15 +84,15 @@ exports.deleteLobby = function (lobbyId) {
     publishEncoded(lobbyId, "");
 }
 
-const _generateUniqueId = function (list) {
-    const idLength = 8; // the length of the generated id
+const _generateUniqueId = function (map) {
+    const idLength = 5; // the length of the generated id
     let newId;
 
     // loop until a unique id is generated
     do {
         // generate a random string of alphanumeric characters
         newId = Math.random().toString(36).substr(2, idLength);
-    } while (list.some(item => item.id === newId));
+    } while (map.has(newId));
 
     return newId;
 }
@@ -169,30 +170,34 @@ exports.handleDisconnection = (lobbyId, playerId)=> {
     console.log(playerId)
     if(lobbyId==undefined || playerId == undefined) return;
     const currentLobbyData = lobbies.get(lobbyId);
+    console.log(currentLobbyData == undefined)
     if (currentLobbyData == undefined) return; //lobby already gone
+    console.log("lobby exists")
     currentLobbyData.removePlayer(playerId);
     publishEmpty(currentLobbyData.id + "/" + playerId);
-    console.log(currentLobbyData.playerList)
-    console.log("count "+currentLobbyData.getOnlinePlayersCount())
-    if ( currentLobbyData.getOnlinePlayersCount() < 2) {
+    console.log("player removed")
+    console.log("players < 2 : ")
+    console.log(currentLobbyData.getOnlinePlayersCount() < 2)
+    console.log("Status not open : ")
+    console.log(!(currentLobbyData.status == Statuses.open))
+    if ( currentLobbyData.getOnlinePlayersCount() < 2 && !(currentLobbyData.status == Statuses.open)) {
         _close(currentLobbyData);
     }
 }
 
-_checkVotingHostDisconnection = function (currentLobbyData){ //if the holder of the token disconnects,
+_checkVotingHostDisconnection = function (currentLobbyData){ 
+    //if the holder of the token disconnects, after 10 seconds a random player gets voted artificially
     if(currentLobbyData.getTurnHolder() != undefined) return;
 
     const core = require('./core');
     //artificially create a player voting itself
     let index = Math.floor(Math.random()*currentLobbyData.playerList.size);
-
     const mapIterator = currentLobbyData.playerList.values()
-    for(let i=0;i<index;i++)
-    mapIterator.next();
+    for(let i=0;i<index-1;i++)
+        mapIterator.next();
     player = mapIterator.next().value
-    console.log(player);
-    player.isMyTurn=true;
 
+    player.isMyTurn=true;
     setTimeout(function() {
         core.voteWinner(currentLobbyData.id, player.id, player.id);
     }, 10000);

@@ -26,10 +26,9 @@ class _LobbyScreenState extends State<LobbyScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
-      // String lobbyId = ModalRoute.of(context)?.settings.arguments as String;
+      String lobbyId = ModalRoute.of(context)?.settings.arguments as String;
       final playerId = Provider.of<User>(context, listen: false).playerData.id;
-      //Provider.of<MqttClientWrapper>(context).connect(lobbyId, playerId);
-      Provider.of<MqttClientWrapper>(context).connect("4jjjnpe6", playerId);
+      Provider.of<MqttClientWrapper>(context).connect(lobbyId, playerId);
       _isInitialized = true;
     }
   }
@@ -136,56 +135,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
           ],
         ),
       );
-
-      CustomLayouts.mainLayout([
-        Text(
-          "Lobby code: ${lobbyData?.id}",
-          style: Theme.of(context).textTheme.headline1,
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.4,
-          width: MediaQuery.of(context).size.width * 0.7,
-          child: GridView(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 2,
-              childAspectRatio: 4 / 2,
-            ),
-            children: [
-              ...?lobbyData?.players.map(
-                (e) => PlayerInLobbyListItem(
-                    playerName: e.nickname, ready: e.isReady),
-              ),
-            ],
-          ),
-        ),
-        Positioned(
-          bottom: 10,
-          right: 10,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text("Number of rounds: ${lobbyData?.maxRoundNumber}"),
-              Text("Round duration: ${lobbyData?.roundDuration}"),
-            ],
-          ),
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        ElevatedButton(
-          onPressed: isReady
-              ? null
-              : () => _handleReady(
-                    lobbyData?.players.length ?? 0,
-                    lobbyData?.id ?? "",
-                  ),
-          child: const Text("I'm ready!"),
-        ),
-      ], context);
     }
   }
 

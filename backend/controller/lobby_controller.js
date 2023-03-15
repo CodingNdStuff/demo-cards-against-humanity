@@ -27,15 +27,14 @@ router.post('/createLobby', [
     try {
         lobbyId = core.createLobby(lobbyData.playerId, lobbyData.nickname, lobbyData.roundDuration, lobbyData.maxRoundNumber);
     } catch (err) {
-        if (err == 500)
-            return res.status(500).end();
+        return res.status(500).end();
     }
 
     return res.status(201).json(lobbyId);
 });
 
 router.post('/setPlayerReady/:lobbyId/:playerId', [
-    param('lobbyId').exists().isString().isLength({ min: 8, max: 8, }),
+    param('lobbyId').exists().isString().isLength({ min: 5, max: 5, }),
     param('playerId').exists().isString().isLength({ min: 1, max: 32, }),
 ], async (req, res) => {
     const errors = validationResult(req);
@@ -47,17 +46,16 @@ router.post('/setPlayerReady/:lobbyId/:playerId', [
     try {
         core.setPlayerReady(lobbyId, playerId);
     } catch (err) {
-        if (err == 500)
-            return res.status(500).end();
         if (err == 404)
             return res.status(404).end();
+        return res.status(500).end();
     }
 
     return res.status(201).end();
 });
 
 router.post('/joinLobby/:lobbyId', [
-    param('lobbyId').exists().isString().isLength({ min: 8, max: 8, }),
+    param('lobbyId').exists().isString().isLength({ min: 5, max: 5, }),
     body('playerId').exists().isString().isLength({ min: 1, max: 32, }),
     body('nickname').exists().isString().isLength({ min: 1, max: 16, }),
 ], async (req, res) => {
@@ -76,11 +74,12 @@ router.post('/joinLobby/:lobbyId', [
     const nickname = req.body.nickname;
     try {
         core.joinLobby(lobbyId, playerId, nickname);
-    } catch (err) {
-        if (err == 500)
-            return res.status(500).end();
+    } catch (err) {   
         if (err == 404)
             return res.status(404).end();
+        if (err == 403)
+            return res.status(404).end();
+        return res.status(500).end();
     } 
 
     return res.status(201).end();
@@ -88,7 +87,7 @@ router.post('/joinLobby/:lobbyId', [
 
 
 // router.get('/drawBlack/:lobbyId', [
-//     param('lobbyId').exists().isString().isLength({ min: 8, max: 8, }),
+//     param('lobbyId').exists().isString().isLength({ min: 5, max: 5, }),
 // ], async (req, res) => {
 //     const errors = validationResult(req);
 //     if (!errors.isEmpty()) {
@@ -109,7 +108,7 @@ router.post('/joinLobby/:lobbyId', [
 // });
 
 // router.get('/drawWhite/:lobbyId', [
-//     param('lobbyId').exists().isString().isLength({ min: 8, max: 8, }),
+//     param('lobbyId').exists().isString().isLength({ min: 5, max: 5, }),
 // ], async (req, res) => {
 //     const errors = validationResult(req);
 //     if (!errors.isEmpty()) {
@@ -130,7 +129,7 @@ router.post('/joinLobby/:lobbyId', [
 // });
 
 router.post('/playCard/:lobbyId/:playerId', [
-    param('lobbyId').exists().isString().isLength({ min: 8, max: 8, }),
+    param('lobbyId').exists().isString().isLength({ min: 5, max: 5, }),
     param('playerId').exists().isString().isLength({ min: 1, max: 32, }),
     body('cardIds').exists().isArray().custom((value) => {
         const allIntegers = value.every((item) => Number.isInteger(item));
@@ -155,16 +154,15 @@ router.post('/playCard/:lobbyId/:playerId', [
     try {
         core.playCard(lobbyId, playerId, cardIds);
     } catch (err) {
-        if (err == 500)
-            return res.status(500).end();
         if (err == 404)
             return res.status(404).end();
+        return res.status(500).end();
     }
     return res.status(201).end();
 });
 
 router.post('/voteWinner/:lobbyId/:playerId', [
-    param('lobbyId').exists().isString().isLength({ min: 8, max: 8, }),
+    param('lobbyId').exists().isString().isLength({ min: 5, max: 5, }),
     param('playerId').exists().isString().isLength({ min: 1, max: 32, }),
     body('votedPlayerId').exists().isString().isLength({ min: 1, max: 32, }),
 ], async (req, res) => {
@@ -183,12 +181,12 @@ router.post('/voteWinner/:lobbyId/:playerId', [
     try {
         core.voteWinner(lobbyId, playerId, votedPlayerId);
     } catch (err) {
-        if (err == 500)
-            return res.status(500).end();
         if (err == 404)
             return res.status(404).end();
         if (err == 403)
             return res.status(403).end();
+        return res.status(500).end();
+        
     }
     return res.status(201).end();
 });

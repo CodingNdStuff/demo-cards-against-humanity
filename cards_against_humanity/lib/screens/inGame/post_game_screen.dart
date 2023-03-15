@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cards_against_humanity/helpers/api_change_notifier.dart';
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
@@ -11,15 +12,15 @@ class PostGameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final providedData = Provider.of<MqttClientWrapper>(context);
-    // final userId = Provider.of<User>(context, listen: false).playerData.id;
     final lobby = providedData.lobby!;
     final players = lobby.players;
     players.sort(((a, b) => b.score - a.score));
     final numberOfPlayers = players.length;
     final maxScore = players[0].score;
     void handleNavigateHome() {
-      providedData.disconnect();
+      providedData.resetLobbyData();
       Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+      Provider.of<ApiChangeNotifier>(context, listen: false).reset();
     }
 
     return Scaffold(
@@ -42,11 +43,13 @@ class PostGameScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
-                      child: ComposedPodium(
-                        nickname: players[1].nickname,
-                        score: players[1].score,
-                        maxScore: maxScore,
-                      ),
+                      child: numberOfPlayers < 2
+                          ? Container()
+                          : ComposedPodium(
+                              nickname: players[1].nickname,
+                              score: players[1].score,
+                              maxScore: maxScore,
+                            ),
                     ),
                     Expanded(
                       child: ComposedPodium(
@@ -126,7 +129,9 @@ class PodiumElement extends StatelessWidget {
         alignment: Alignment.topCenter,
         children: [
           Container(
-            height: MediaQuery.of(context).size.height * 0.4 * heightFactor,
+            height: MediaQuery.of(context).size.height *
+                0.4 *
+                (heightFactor > 0 ? heightFactor : 1),
             margin: const EdgeInsets.symmetric(
               horizontal: 32,
             ),

@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cards_against_humanity/helpers/api_change_notifier.dart';
 import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
 import 'package:cards_against_humanity/models/lobby.dart';
@@ -39,9 +38,10 @@ class _EndRoundDisplayState extends State<EndRoundDisplay> {
       });
     }
 
-    final Player winner = lobby.whoOwnsToken();
+    final Player? winner = lobby.whoOwnsToken();
     final List<WhiteCard> winningProposal =
-        proposals.firstWhere((p) => p["playerId"] == winner.id)["playedCards"];
+        proposals.firstWhere((p) => p["playerId"] == winner?.id)["playedCards"];
+
     return Container(
       padding: const EdgeInsets.only(
         top: 16,

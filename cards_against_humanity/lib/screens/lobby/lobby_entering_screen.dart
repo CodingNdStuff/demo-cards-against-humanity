@@ -92,7 +92,8 @@ class _LobbyEnteringScreenState extends State<LobbyEnteringScreen> {
   void _handleEnterLobby() async {
     // here we simply invoke the wrapper to the api call
     final playerData = Provider.of<User>(context, listen: false).playerData;
-    Provider.of<ApiChangeNotifier>(context, listen: false)
-        .enterLobby(_lobbyCode.text, playerData.id, playerData.nickname);
+    final notifier = Provider.of<ApiChangeNotifier>(context, listen: false);
+    notifier.enterLobby(
+        _lobbyCode.text.trim(), playerData.id, playerData.nickname);
   }
 }

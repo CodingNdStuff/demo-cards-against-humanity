@@ -33,7 +33,13 @@ class Lobby {
     return players.firstWhere((p) => p.id == userId).isMyTurn;
   }
 
-  Player whoOwnsToken() {
-    return players.firstWhere((p) => p.isMyTurn);
+  Player? whoOwnsToken() {
+    Player? player;
+    for (var p in players) {
+      if (p.isMyTurn) {
+        player = p;
+      }
+    }
+    return player;
   }
 }

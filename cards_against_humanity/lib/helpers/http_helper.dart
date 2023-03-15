@@ -26,7 +26,8 @@ abstract class API {
       );
       // .timeout(const Duration(seconds: 5));
       if (response.statusCode == 201) return true;
-      throw Failure(code: 2, message: "Specified lobby does not exists.");
+      throw Failure(
+          code: 2, message: "Specified code corresponds to no open lobby.");
     } on HttpException {
       throw Failure(code: 1, message: "Looks like the service is unavailable.");
     } on TimeoutException {

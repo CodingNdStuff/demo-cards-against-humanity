@@ -32,7 +32,19 @@ class MqttClientWrapper with ChangeNotifier {
     }
   }
 
+  // void _unsubscribeToTopic(String topic) {
+  //   try {
+  //     if (connectionState?.state == MqttConnectionState.connected) {
+  //       print('[MQTT client] Unsubscribing to ${topic.trim()}');
+  //       client!.unsubscribe(topic);
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
+
   void connect(String topic, String playerId) async {
+    print("acab");
     client = MqttServerClient.withPort(broker, playerId, port);
     client?.useWebSocket = true;
     client?.keepAlivePeriod = 30;
@@ -141,6 +153,7 @@ class MqttClientWrapper with ChangeNotifier {
   }
 
   void _updateOpenLobby(lobbyJsonObject, lobbyId) {
+    print("updating open");
     List<dynamic> playerListObject =
         lobbyJsonObject["players"] as List<dynamic>;
     List<Player> playerList = playerListObject
@@ -156,6 +169,7 @@ class MqttClientWrapper with ChangeNotifier {
       maxRoundNumber: lobbyJsonObject["maxRoundNumber"] as int,
       players: playerList,
     );
+    print("updated open");
   }
 
   void _updateOngoingLobby(lobbyJsonObject, lobbyId) {
@@ -196,17 +210,24 @@ class MqttClientWrapper with ChangeNotifier {
     if (lobby?.phase == status.closed) disconnect();
   }
 
-  void _publish(String topic, String message) {
-    final builder = MqttClientPayloadBuilder();
-    builder.addString(message);
-    client?.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!);
-  }
+  // void _publish(String topic, String message) {
+  //   final builder = MqttClientPayloadBuilder();
+  //   builder.addString(message);
+  //   client?.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!);
+  // }
 
   void disconnect() {
     print('[MQTT client] _disconnect()');
     // _publish("${lobby?.id}/willmsg", json.encode(playerId));
     client?.disconnect();
+    subscription?.cancel();
     //_onDisconnected();
+  }
+
+  void resetLobbyData() {
+    lobby = null;
+    hand = null;
+    proposals = null;
   }
 
   void placeCard(WhiteCard card) {
@@ -215,6 +236,7 @@ class MqttClientWrapper with ChangeNotifier {
   }
 
   void takeCardsBack() {
+    // ignore: avoid_function_literals_in_foreach_calls
     lobby?.currentBlackCard?.placedCards.forEach((card) {
       hand?.add(card);
     });

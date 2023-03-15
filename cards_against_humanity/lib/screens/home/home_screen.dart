@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
             counterText: "",
           ),
           controller: _nicknameController,
-          onChanged: (value) => user.changeNickname(value),
+          onChanged: (value) => user.changeNickname(value.trim()),
         ),
       ),
       const SizedBox(
