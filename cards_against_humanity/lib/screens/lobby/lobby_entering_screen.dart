@@ -5,6 +5,7 @@ import 'package:cards_against_humanity/widgets/custom_layouts.dart';
 import 'package:cards_against_humanity/widgets/error_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class LobbyEnteringScreen extends StatefulWidget {
@@ -17,11 +18,27 @@ class LobbyEnteringScreen extends StatefulWidget {
 
 class _LobbyEnteringScreenState extends State<LobbyEnteringScreen> {
   final _lobbyCode = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_onFocusChange);
+  }
 
   @override
   void dispose() {
     super.dispose();
     _lobbyCode.dispose();
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
+  }
+
+  void _onFocusChange() {
+    if (!_focusNode.hasFocus) {
+      // When the keyboard closes, set the system UI overlays to fullscreen mode
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
   }
 
   void _handleStateChange(notifier) {
@@ -61,6 +78,7 @@ class _LobbyEnteringScreenState extends State<LobbyEnteringScreen> {
                 SizedBox(
                   width: 300,
                   child: TextFormField(
+                    focusNode: _focusNode,
                     controller: _lobbyCode,
                     maxLength: 20,
                     textAlign: TextAlign.center,

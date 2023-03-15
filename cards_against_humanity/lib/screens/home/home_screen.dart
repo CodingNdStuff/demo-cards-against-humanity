@@ -3,6 +3,7 @@ import 'package:cards_against_humanity/screens/lobby/lobby_creation_screen.dart'
 import 'package:cards_against_humanity/screens/lobby/lobby_entering_screen.dart';
 import 'package:cards_against_humanity/widgets/custom_layouts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,11 +16,27 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _nicknameController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_onFocusChange);
+  }
 
   @override
   void dispose() {
     super.dispose();
     _nicknameController.dispose();
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
+  }
+
+  void _onFocusChange() {
+    if (!_focusNode.hasFocus) {
+      // When the keyboard closes, set the system UI overlays to fullscreen mode
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
   }
 
   @override
@@ -37,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
       SizedBox(
         width: 300,
         child: TextField(
+          focusNode: _focusNode,
           textAlign: TextAlign.center,
           maxLength: 16,
           decoration: const InputDecoration(
