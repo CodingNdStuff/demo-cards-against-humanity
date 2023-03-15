@@ -14,27 +14,27 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _nicknameController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(_onFocusChange);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
     super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     _nicknameController.dispose();
-    _focusNode.removeListener(_onFocusChange);
-    _focusNode.dispose();
   }
 
-  void _onFocusChange() {
-    if (!_focusNode.hasFocus) {
-      // When the keyboard closes, set the system UI overlays to fullscreen mode
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    final bool isKeyboardShowing = MediaQuery.of(context).viewInsets.right > 0;
+    if (!isKeyboardShowing) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
   }
@@ -43,48 +43,59 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final user = Provider.of<User>(context, listen: false);
     _nicknameController.text = user.playerData.nickname;
-    return CustomLayouts.mainLayout([
-      Text(
-        "Cards \nAgainst \nHumanity",
-        style: Theme.of(context).textTheme.headline1,
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      SizedBox(
-        width: 300,
-        child: TextField(
-          focusNode: _focusNode,
-          textAlign: TextAlign.center,
-          maxLength: 16,
-          decoration: const InputDecoration(
-            hintText: "Username",
-            counterText: "",
-          ),
-          controller: _nicknameController,
-          onChanged: (value) => user.changeNickname(value.trim()),
+    return Scaffold(
+        body: Container(
+      width: double.infinity,
+      alignment: Alignment.center,
+      decoration:
+          BoxDecoration(color: Theme.of(context).colorScheme.background),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Cards \nAgainst \nHumanity",
+              style: Theme.of(context).textTheme.headline1,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            SizedBox(
+              width: 300,
+              child: TextField(
+                textAlign: TextAlign.center,
+                maxLength: 16,
+                decoration: const InputDecoration(
+                  hintText: "Username",
+                  counterText: "",
+                ),
+                controller: _nicknameController,
+                onChanged: (value) => user.changeNickname(value.trim()),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _handleCreateLobby,
+                  child: const Text("Create lobby"),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+                ElevatedButton(
+                  onPressed: _handleJoinLobby,
+                  child: const Text("Join lobby"),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
-      const SizedBox(
-        height: 10,
-      ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: _handleCreateLobby,
-            child: const Text("Create lobby"),
-          ),
-          const SizedBox(
-            width: 10,
-          ),
-          ElevatedButton(
-            onPressed: _handleJoinLobby,
-            child: const Text("Join lobby"),
-          ),
-        ],
-      ),
-    ], context);
+    ));
   }
 
   void _handleCreateLobby() {

@@ -16,29 +16,30 @@ class LobbyEnteringScreen extends StatefulWidget {
   State<LobbyEnteringScreen> createState() => _LobbyEnteringScreenState();
 }
 
-class _LobbyEnteringScreenState extends State<LobbyEnteringScreen> {
+class _LobbyEnteringScreenState extends State<LobbyEnteringScreen>
+    with WidgetsBindingObserver {
   final _lobbyCode = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(_onFocusChange);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    final bool isKeyboardShowing = MediaQuery.of(context).viewInsets.right > 0;
+    if (!isKeyboardShowing) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     _lobbyCode.dispose();
-    _focusNode.removeListener(_onFocusChange);
-    _focusNode.dispose();
-  }
-
-  void _onFocusChange() {
-    if (!_focusNode.hasFocus) {
-      // When the keyboard closes, set the system UI overlays to fullscreen mode
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    }
   }
 
   void _handleStateChange(notifier) {
@@ -78,7 +79,6 @@ class _LobbyEnteringScreenState extends State<LobbyEnteringScreen> {
                 SizedBox(
                   width: 300,
                   child: TextFormField(
-                    focusNode: _focusNode,
                     controller: _lobbyCode,
                     maxLength: 20,
                     textAlign: TextAlign.center,
