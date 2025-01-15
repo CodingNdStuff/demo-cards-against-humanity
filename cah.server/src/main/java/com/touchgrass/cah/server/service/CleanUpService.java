@@ -28,7 +28,7 @@ public class CleanUpService {
                 if (watcher.expirationTime() > now) {
                     break; // Stop if the soonest watcher hasn't expired
                 }
-                watcherQueue.poll(); // Remove from queue
+                watcherQueue.poll();
                 watcherMap.remove(watcher.id());
                 System.out.println("------------Removing " + watcher.id);
                 cb.onCleanUp(watcher.id());
@@ -38,14 +38,14 @@ public class CleanUpService {
             if (watcherMap.isEmpty() && isSchedulerRunning.compareAndSet(true, false)) {
                 stopScheduler();
             }
-        }, 0, 1, TimeUnit.SECONDS); // Poll every 10 second
+        }, 0, 10, TimeUnit.SECONDS); // Poll every 10 second
     }
 
     private void stopScheduler() {
         scheduler.shutdownNow();
         try {
             System.out.println("------------Thread is terminated ");
-            scheduler.awaitTermination(1, TimeUnit.SECONDS); // Wait for graceful shutdown
+            scheduler.awaitTermination(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -53,7 +53,7 @@ public class CleanUpService {
 
     public void addWatcher(String id) {
         ensureSchedulerRunning();
-        long expirationTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(20); // 3 minutes before destroying the lobby
+        long expirationTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(180); // 3 minutes before destroying the lobby
         LobbyWatcher watcher = new LobbyWatcher(id, expirationTime);
         watcherQueue.add(watcher);
         watcherMap.put(id, watcher);

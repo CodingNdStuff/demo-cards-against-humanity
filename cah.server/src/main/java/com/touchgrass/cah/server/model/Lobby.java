@@ -25,7 +25,7 @@ public class Lobby {
     private HashMap<String, Player> playerList;
 
     public Lobby(int roundDuration, int maxRoundNumber, Player host, Deck deck) {
-        id = UUID.randomUUID().toString();
+        id = "11111"; // UUID.randomUUID().toString();
         status = LobbyStatus.open;
         this.roundDuration = roundDuration;
         this.maxRoundNumber = maxRoundNumber;

@@ -154,6 +154,9 @@ public class LobbyService {
         lobby.resetAllPlayerReady();
         lobby.refillHands();
         lobby.getTurnHolder().setReady(true);
+        for(Player p : lobby.getPlayerList().values()) {
+            firebaseService.publishHandData(lobby.getId(), p);
+        }
     }
 
     private void _startVoting(Lobby lobby) {
@@ -177,9 +180,10 @@ public class LobbyService {
             lobby.resetAllPlayerReady();
             lobby.refillHands();
             lobby.nextBlackCard();
-            // publish player
+            for(Player p : lobby.getPlayerList().values()) {
+                firebaseService.publishHandData(lobby.getId(), p);
+            }
         }
-        // publish lobby
     }
 
     private void _close (Lobby lobby) {
