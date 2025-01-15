@@ -14,10 +14,6 @@ import lombok.*;
 @ToString
 public class CreateLobbyRequest {
     @NotBlank
-    @Size(min = 1, max = 32)
-    private String playerId;
-
-    @NotBlank
     @Size(min = 1, max = 16)
     private String nickname;
 

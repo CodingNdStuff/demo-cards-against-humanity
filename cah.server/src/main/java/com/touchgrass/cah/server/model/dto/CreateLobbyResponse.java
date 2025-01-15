@@ -9,8 +9,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class JoinLobbyRequest {
+public class CreateLobbyResponse {
     @NotBlank
-    @Size(min = 1, max = 16)
-    private String nickname;
+    @Size(min = 1, max = 32)
+    private String lobbyId;
+    @NotBlank
+    @Size(min = 1, max = 32)
+    private String playerId;
 }

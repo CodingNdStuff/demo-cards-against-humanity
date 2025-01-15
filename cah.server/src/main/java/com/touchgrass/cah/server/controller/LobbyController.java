@@ -1,12 +1,10 @@
 package com.touchgrass.cah.server.controller;
 
 import com.touchgrass.cah.server.model.*;
-import com.touchgrass.cah.server.model.dto.CreateLobbyRequest;
-import com.touchgrass.cah.server.model.dto.JoinLobbyRequest;
-import com.touchgrass.cah.server.model.dto.PlayCardRequest;
-import com.touchgrass.cah.server.model.dto.VoteWinnerRequest;
+import com.touchgrass.cah.server.model.dto.*;
 import com.touchgrass.cah.server.service.FirebaseService;
 import com.touchgrass.cah.server.service.LobbyService;
+import com.touchgrass.cah.server.utils.Constants;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 
 @RestController
@@ -40,12 +39,16 @@ public class LobbyController {
     public ResponseEntity<?> createLobby(
             @RequestBody @Valid CreateLobbyRequest lobbyRequest) {
         try {
+            String playerId = "sdq12d"; //UUID.randomUUID().toString();
             String lobbyId = lobbyService.createLobby(
-                    lobbyRequest.getPlayerId(),
+                    playerId,
                     lobbyRequest.getNickname(),
                     lobbyRequest.getRoundDuration(),
                     lobbyRequest.getMaxRoundNumber());
-            return ResponseEntity.status(201).body(Map.of("lobbyId", lobbyId));
+            CreateLobbyResponse responseBody = new CreateLobbyResponse();
+            responseBody.setPlayerId(playerId);
+            responseBody.setLobbyId(lobbyId);
+            return ResponseEntity.status(201).body(responseBody);
         } catch (CustomException e) {
             return ResponseEntity.status(e.getCode()).body(e.getMessage());
         }
@@ -56,8 +59,10 @@ public class LobbyController {
             @PathVariable @Size(min = 5, max = 5) String lobbyId,
             @RequestBody @Valid JoinLobbyRequest joinLobbyRequest) {
         try {
-            lobbyService.joinLobby(lobbyId, joinLobbyRequest.getPlayerId(), joinLobbyRequest.getNickname());
-            return ResponseEntity.status(201).build();
+            String playerId = lobbyService.joinLobby(lobbyId, joinLobbyRequest.getNickname());
+            JoinLobbyResponse responseBody = new JoinLobbyResponse();
+            responseBody.setPlayerId(playerId);
+            return ResponseEntity.status(201).body(responseBody);
         } catch (CustomException e) {
             return ResponseEntity.status(e.getCode()).body(e.getMessage());
         }
@@ -94,7 +99,7 @@ public class LobbyController {
             @PathVariable @Size(min = 1, max = 32) String playerId,
             @RequestBody @Valid VoteWinnerRequest voteWinnerRequest) {
         try {
-            lobbyService.voteWinner(lobbyId, playerId, voteWinnerRequest.getVotedPlayerId());
+            lobbyService.voteWinner(lobbyId, playerId, voteWinnerRequest.getVotedPlayerNickname());
             return ResponseEntity.status(201).build();
         } catch (CustomException e) {
             return ResponseEntity.status(e.getCode()).body(e.getMessage());

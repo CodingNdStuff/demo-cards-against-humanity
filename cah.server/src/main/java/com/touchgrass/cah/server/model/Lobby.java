@@ -6,9 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Getter
 @Setter
@@ -27,11 +25,11 @@ public class Lobby {
     private HashMap<String, Player> playerList;
 
     public Lobby(int roundDuration, int maxRoundNumber, Player host, Deck deck) {
-        id = "11111"; // UUID.randomUUID().toString();
+        id = UUID.randomUUID().toString();
         status = LobbyStatus.open;
         this.roundDuration = roundDuration;
         this.maxRoundNumber = maxRoundNumber;
-        this.currentRound = 0;
+        this.currentRound = 1;
         round = new Round();
         playerList = new HashMap<>();
         playerList.put(host.getId(), host);
@@ -91,7 +89,7 @@ public class Lobby {
                 remainingCards.add(c);
         }
         if (found != cardIds.size()) throw new CustomException(404, "Player possesses no such card");
-        round.getPlayedCards().put(playerId, playedCards);
+        round.getPlayedCards().put(getNicknameFromId(playerId), playedCards);
         player.setHand(remainingCards);
     }
 
@@ -105,5 +103,16 @@ public class Lobby {
     public void nextBlackCard() {
         round.setCurrentBlackCard(deck.drawBlackCard());
         round.setPlayedCards(new HashMap<>());
+    }
+
+    private String getNicknameFromId(String playerId) throws CustomException {
+        Player player = playerList.get(playerId);
+        if(player == null) throw new CustomException(404, "Player not found");
+        return player.getNickname();
+    }
+
+    public Player playerFromNickname (String nickname){
+        Optional<Player> player = playerList.values().stream().filter(p -> p.getNickname().equals(nickname)).findFirst();
+        return player.orElse(null);
     }
 }

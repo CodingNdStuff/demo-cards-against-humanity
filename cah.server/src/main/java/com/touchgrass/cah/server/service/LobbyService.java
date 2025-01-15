@@ -5,13 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.touchgrass.cah.server.model.*;
 import com.touchgrass.cah.server.utils.Constants;
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -19,33 +18,48 @@ public class LobbyService {
 
     @Autowired
     private JsonService jsonService;
+    @Autowired
+    private FirebaseService firebaseService;
+    @Autowired
+    private CleanUpService cleanUpService;
 
     private final Map<String, Lobby> lobbies = new HashMap<>();
 
+    @PostConstruct
+    public void initializeOnStartup() {
+        cleanUpService.init(this::deleteLobby);
+    }
+
     //region actions
-    public String createLobby(@NotBlank @Size(min = 1, max = 32) String playerId, @NotBlank @Size(min = 1, max = 16) String nickname, @Min(15) @Max(60) int roundDuration, @Min(1) @Max(15) int maxRoundNumber) throws CustomException {
+    public String createLobby(String playerId, String nickname, int roundDuration, int maxRoundNumber) throws CustomException {
         System.out.println("Creating lobby");
         if (lobbies.size() >= Constants.MAX_LOBBIES) throw new CustomException(500, "Service is too busy, retry later");
         Lobby lobby = new Lobby(roundDuration, maxRoundNumber, new Player(playerId, nickname), new Deck(jsonService.getAllBlackCards(), jsonService.getAlWhiteCards()));
         lobbies.put(lobby.getId(), lobby);
         System.out.println("Lobby created " + lobby.getId() + ", " + lobbies.size() + " lobbies active");
+        firebaseService.publishLobbyData(lobby);
+        cleanUpService.addWatcher(lobby.getId());
         return lobby.getId();
     }
 
-    public void joinLobby(String lobbyId, String playerId, String nickname) throws CustomException {
-        System.out.println("Player " + nickname + " (" + playerId + ") joining the lobby " + lobbyId);
+    public String joinLobby(String lobbyId, String nickname) throws CustomException {
+        System.out.println("Player " + nickname + " joining the lobby " + lobbyId);
         Lobby lobby = getLobbyOrThrow(lobbyId);
 
         if (lobby.getStatus() != LobbyStatus.open) {
             throw new CustomException(403, "Cannot join a closed or ongoing lobby.");
         }
 
-        if (lobby.getPlayerList().get(playerId) != null) {
-            throw new CustomException(409, "Player already in lobby");
+        if (lobby.playerFromNickname(nickname) != null) {
+            throw new CustomException(409, "Nickname already in use");
         }
-
-        System.out.println("Player " + nickname + " (" + playerId + ") successfully joined the lobby " + lobbyId);
-        lobby.addPlayer(new Player(playerId, nickname));
+        //Player player = new Player(UUID.randomUUID().toString(), nickname); todo uncomment this
+        Player player = new Player("22222", nickname);
+        System.out.println("Player " + nickname + " (" + player.getId() + ") successfully joined the lobby " + lobbyId);
+        lobby.addPlayer(player);
+        firebaseService.publishLobbyData(lobby);
+        cleanUpService.refreshWatcher(lobby.getId());
+        return player.getId();
     }
 
     public void setPlayerReady(String lobbyId, String playerId) throws CustomException {
@@ -68,9 +82,11 @@ public class LobbyService {
                 }
             }
         }
+        firebaseService.publishLobbyData(lobby);
+        cleanUpService.refreshWatcher(lobby.getId());
     }
 
-    public void playCard(@Size(min = 5, max = 5) String lobbyId, @Size(min = 1, max = 32) String playerId, @NotNull @Size(min = 1) List<@NotNull Integer> cardIds) throws CustomException {
+    public void playCard(String lobbyId, String playerId, List<Integer> cardIds) throws CustomException {
         System.out.println("Player " + " (" + playerId + ") attempts to play card(s) " + cardIds + " in lobby " + lobbyId);
         Lobby lobby = getLobbyOrThrow(lobbyId);
         if (lobby.getStatus() != LobbyStatus.play) throw new CustomException(409, "Cannot play a card right now");
@@ -90,13 +106,15 @@ public class LobbyService {
             System.out.println("All players are ready");
             _startVoting(lobby);
         }
+        firebaseService.publishLobbyData(lobby);
+        cleanUpService.refreshWatcher(lobby.getId());
     }
 
-    public void voteWinner(@Size(min = 5, max = 5) String lobbyId, @Size(min = 1, max = 32) String playerId, @NotBlank @Size(min = 1, max = 32) String votedPlayerId) throws CustomException {
-        System.out.println("Player (" + playerId + ") attempts to vote " + votedPlayerId + " in lobby " + lobbyId);
+    public void voteWinner(String lobbyId, String playerId, String votedPlayerNickname) throws CustomException {
+        System.out.println("Player (" + playerId + ") attempts to vote " + votedPlayerNickname + " in lobby " + lobbyId);
         Lobby lobby = getLobbyOrThrow(lobbyId);
         Player votingPlayer = lobby.getPlayerList().get(playerId);
-        Player votedPlayer = lobby.getPlayerList().get(votedPlayerId);
+        Player votedPlayer = lobby.playerFromNickname(votedPlayerNickname);
 
         if(votingPlayer == null || votedPlayer == null) {
             throw new CustomException(404, "Player not found");
@@ -110,13 +128,21 @@ public class LobbyService {
         votedPlayer.setMyTurn(true);
         votedPlayer.addScore(100);
         votedPlayer.setReady(true);
+        lobby.getRound().setWinnerNickname(votedPlayer.getNickname());
+        ArrayList<String> winnerCards = new ArrayList<>();
+        for(WhiteCard card : lobby.getRound().getPlayedCards().get(votedPlayer.getNickname())) { //todo verify order
+            winnerCards.add(card.getText());
+        }
+        lobby.getRound().setWinnerCardTexts(winnerCards);
         lobby.setCurrentRound(lobby.getCurrentRound() + 1);
         System.out.println("Player (" + playerId + ") " + votingPlayer.getNickname() + " voted (" + votedPlayer + ") " + votedPlayer.getNickname() + " in lobby " + lobbyId);
 
-        if(lobby.getCurrentRound() < lobby.getMaxRoundNumber())
+        if(lobby.getCurrentRound() <= lobby.getMaxRoundNumber())
             _prepareNextRound(lobby);
         else
             _close(lobby);
+        firebaseService.publishLobbyData(lobby);
+        cleanUpService.refreshWatcher(lobby.getId());
     }
 
     //endregion
@@ -162,7 +188,10 @@ public class LobbyService {
         // publish lobby
         // publish player
         lobbies.remove(lobby.getId());
+        firebaseService.deleteLobbyData(lobby.getId());
+        cleanUpService.stopWatcher(lobby.getId());
         System.out.println("Lobby " + lobby.getId() + " is closed, " + lobbies.size() + " lobbies remaining");
+        cleanUpService.stopWatcher(lobby.getId());
     }
 
     //endregion
@@ -207,12 +236,10 @@ public class LobbyService {
         );
     }
 
-    private void deleteLobby(String lobbyId) throws CustomException {
-        System.out.println("Deleting lobby " + lobbyId);
-        if (!lobbies.containsKey(lobbyId)) {
-            throw new CustomException(404, "Lobby not found.");
-        }
+    private void deleteLobby(String lobbyId) {
         lobbies.remove(lobbyId);
+        firebaseService.deleteLobbyData(lobbyId);
+        System.out.println("Deleting lobby " + lobbyId + ", " + lobbies.size() + " lobbies active");
     }
 
     private Lobby getLobbyOrThrow(String lobbyId) throws CustomException {

@@ -13,4 +13,6 @@ import java.util.HashMap;
 public class Round {
     private BlackCard currentBlackCard;
     private HashMap<String, ArrayList<WhiteCard>> playedCards = new HashMap<>();
+    private String winnerNickname;
+    private ArrayList<String> winnerCardTexts;
 }

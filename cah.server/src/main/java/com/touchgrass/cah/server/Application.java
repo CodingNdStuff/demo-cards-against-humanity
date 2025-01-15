@@ -36,7 +36,10 @@ public class Application {
 /*
 	Test cases to study:
 		- prevent hackers from voting themselves by knowing the playerIds
-		- could prevent same nickname in lobby, so that one votes via nickname. And then the hands and data are actually displayed if you know the id,
-		and that same id is used to validate voting requests
-		- consider RSA to cipher the payload
 */
+
+/*
+	Known issues:
+		- no ip checks: a user can spam "create lobby" and fill the lobby number size
+		- payload is not protected, consider rsa
+ */
