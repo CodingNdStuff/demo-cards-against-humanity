@@ -20,11 +20,6 @@ public class LobbyService {
     @Autowired
     private JsonService jsonService;
 
-    /*
-    public void voteWinner(@Size(min = 5, max = 5) String lobbyId, @Size(min = 1, max = 32) String playerId, @NotBlank @Size(min = 1, max = 32) String votedPlayerId) {
-    }
-    */
-
     private final Map<String, Lobby> lobbies = new HashMap<>();
 
     //region actions
@@ -33,7 +28,7 @@ public class LobbyService {
         if (lobbies.size() >= Constants.MAX_LOBBIES) throw new CustomException(500, "Service is too busy, retry later");
         Lobby lobby = new Lobby(roundDuration, maxRoundNumber, new Player(playerId, nickname), new Deck(jsonService.getAllBlackCards(), jsonService.getAlWhiteCards()));
         lobbies.put(lobby.getId(), lobby);
-        System.out.println("Lobby created " + lobby.getId());
+        System.out.println("Lobby created " + lobby.getId() + ", " + lobbies.size() + " lobbies active");
         return lobby.getId();
     }
 
@@ -81,6 +76,12 @@ public class LobbyService {
         if (lobby.getStatus() != LobbyStatus.play) throw new CustomException(409, "Cannot play a card right now");
         if (cardIds.size() != lobby.getRound().getCurrentBlackCard().getNumberOfBlanks())
             throw new CustomException(409, "A wrong number of white cards were provided");
+        Player player = lobby.getPlayerList().get(playerId);
+        if (player == null)
+            throw new CustomException(404, "Player not found");
+        if (player.isMyTurn())
+            throw new CustomException(409, "Cannot play a card right now");
+
         lobby.playCard(playerId, cardIds);
         lobby.setPlayerReady(playerId);
         //publishEncoded(lobbyId, lobby.getOngoingLobbyData());
@@ -91,6 +92,33 @@ public class LobbyService {
         }
     }
 
+    public void voteWinner(@Size(min = 5, max = 5) String lobbyId, @Size(min = 1, max = 32) String playerId, @NotBlank @Size(min = 1, max = 32) String votedPlayerId) throws CustomException {
+        System.out.println("Player (" + playerId + ") attempts to vote " + votedPlayerId + " in lobby " + lobbyId);
+        Lobby lobby = getLobbyOrThrow(lobbyId);
+        Player votingPlayer = lobby.getPlayerList().get(playerId);
+        Player votedPlayer = lobby.getPlayerList().get(votedPlayerId);
+
+        if(votingPlayer == null || votedPlayer == null) {
+            throw new CustomException(404, "Player not found");
+        }
+
+        if(!votingPlayer.isMyTurn()) {
+            throw new CustomException(401, "Unauthorized");
+        }
+
+        votingPlayer.setMyTurn(false);
+        votedPlayer.setMyTurn(true);
+        votedPlayer.addScore(100);
+        votedPlayer.setReady(true);
+        lobby.setCurrentRound(lobby.getCurrentRound() + 1);
+        System.out.println("Player (" + playerId + ") " + votingPlayer.getNickname() + " voted (" + votedPlayer + ") " + votedPlayer.getNickname() + " in lobby " + lobbyId);
+
+        if(lobby.getCurrentRound() < lobby.getMaxRoundNumber())
+            _prepareNextRound(lobby);
+        else
+            _close(lobby);
+    }
+
     //endregion
 
     //region lobby status changes
@@ -99,6 +127,7 @@ public class LobbyService {
         lobby.setStatus(LobbyStatus.play);
         lobby.resetAllPlayerReady();
         lobby.refillHands();
+        lobby.getTurnHolder().setReady(true);
     }
 
     private void _startVoting(Lobby lobby) {
@@ -113,8 +142,29 @@ public class LobbyService {
 
     private void _prepareNextRound(Lobby lobby) {
         System.out.println("Lobby " + lobby.getId() + " is preparing for a new round");
-        // Logic for preparing the next round
+
+        if(lobby.getStatus() == LobbyStatus.voting){
+            lobby.setStatus(LobbyStatus.prep);
+            lobby.resetAllPlayerReady();
+        }else if(lobby.getStatus() == LobbyStatus.prep){
+            lobby.setStatus(LobbyStatus.play);
+            lobby.resetAllPlayerReady();
+            lobby.refillHands();
+            lobby.nextBlackCard();
+            // publish player
+        }
+        // publish lobby
     }
+
+    private void _close (Lobby lobby) {
+        System.out.println("Lobby " + lobby.getId() + " is closing");
+        lobby.setStatus(LobbyStatus.closed);
+        // publish lobby
+        // publish player
+        lobbies.remove(lobby.getId());
+        System.out.println("Lobby " + lobby.getId() + " is closed, " + lobbies.size() + " lobbies remaining");
+    }
+
     //endregion
 
     //region utility
@@ -126,15 +176,15 @@ public class LobbyService {
         try {
             return mapper.writeValueAsString(lobby);
         } catch (JsonProcessingException e) {
+            System.out.println(e.getMessage());
             throw new CustomException(500, "Unable to process lobby information");
         }
     }
 
     private void checkVotingHostDisconnection(Lobby lobby) { //todo test in real scenario
-        System.out.println("Disconnection during voting occurred in lobby " + lobby.getId() + ", preparing automated voting procedure");
         //if the holder of the token disconnects, after 10 seconds a random player gets voted artificially
-        if (lobby.getTurnHolder() != null) return;
-
+        if (lobby.getTurnHolder() != null && lobby.getPlayerList().containsKey(lobby.getTurnHolder().getId())) return;
+        System.out.println("Disconnection during voting occurred in lobby " + lobby.getId() + ", preparing automated voting procedure");
         int index = ThreadLocalRandom.current().nextInt(lobby.getPlayerList().size());
 
         Player player = lobby.getPlayerList().values().stream().toList().get(index);
@@ -146,7 +196,11 @@ public class LobbyService {
                     @Override
                     public void run() {
                         System.out.println("Disconnection during voting occurred in lobby " + lobby.getId() + ", automatically voting " + player.getNickname() + " (" + player.getId() + ")");
-                        // todo vote winner
+                        try {
+                            voteWinner(lobby.getId(), player.getId(), player.getId());
+                        } catch (CustomException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 },
                 10_000 // 10 seconds in milliseconds

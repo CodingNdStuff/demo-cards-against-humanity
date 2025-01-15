@@ -1,5 +1,6 @@
 package com.touchgrass.cah.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.touchgrass.cah.server.utils.Constants;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,6 +22,7 @@ public class Lobby {
     private int maxRoundNumber;
     private int currentRound;
     private Round round;
+    @JsonIgnore
     private Deck deck;
     private HashMap<String, Player> playerList;
 
@@ -93,10 +95,15 @@ public class Lobby {
         player.setHand(remainingCards);
     }
 
-    public String getTurnHolder() { // todo can optimize
+    public Player getTurnHolder() { // todo can optimize
         for (Player p : playerList.values()) {
-            if (p.isMyTurn()) return p.getId();
+            if (p.isMyTurn()) return p;
         }
         return null;
+    }
+
+    public void nextBlackCard() {
+        round.setCurrentBlackCard(deck.drawBlackCard());
+        round.setPlayedCards(new HashMap<>());
     }
 }

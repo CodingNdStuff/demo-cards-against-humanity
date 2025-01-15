@@ -32,3 +32,11 @@ public class Application {
 		prep(4) -> winning card is shown, a new round is setup, players must set themselves ready. The next phase can either be "play" or "closed"
 		closed(5) -> game over, lobby will be disposed (possibly in the future "play again with different cards" feature will be added
  */
+
+/*
+	Test cases to study:
+		- prevent hackers from voting themselves by knowing the playerIds
+		- could prevent same nickname in lobby, so that one votes via nickname. And then the hands and data are actually displayed if you know the id,
+		and that same id is used to validate voting requests
+		- consider RSA to cipher the payload
+*/

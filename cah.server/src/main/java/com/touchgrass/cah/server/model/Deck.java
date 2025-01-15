@@ -1,10 +1,7 @@
 package com.touchgrass.cah.server.model;
 
-import com.touchgrass.cah.server.service.JsonService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -26,7 +23,7 @@ public class Deck {
         int cardIndex = rand.nextInt(blackCards.size() - 1);
         BlackCard drawnCard = blackCards.get(cardIndex);
         blackCards.remove(cardIndex);
-        System.out.println("Pulled a new Black Card " + drawnCard.getId() + " " + drawnCard.getText().substring(0, 15) + "...");
+        System.out.println("Pulled a new Black Card " + drawnCard.getId() + " " + drawnCard.getText().substring(0, Math.min(15, drawnCard.getText().length())) + "...");
         return drawnCard;
     }
 
@@ -39,7 +36,7 @@ public class Deck {
         int cardIndex = rand.nextInt(whiteCards.size() - 1);
         WhiteCard drawnCard = whiteCards.get(cardIndex);
         whiteCards.remove(cardIndex);
-        System.out.println("Pulled a new White Card " + drawnCard.getId() + " " + drawnCard.getText().substring(0, 15) + "...");
+        System.out.println("Pulled a new White Card " + drawnCard.getId() + " " + drawnCard.getText().substring(0, Math.min(15, drawnCard.getText().length())) + "...");
         return drawnCard;
     }
 }

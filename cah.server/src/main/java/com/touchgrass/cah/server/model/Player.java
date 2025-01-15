@@ -21,4 +21,12 @@ public class Player {
         this.id = id;
         this.nickname = nickname;
     }
+
+    public void addScore(int points) {
+        this.score += points;
+    }
+
+    public void resetScore() {
+        this.score = 0;
+    }
 }
