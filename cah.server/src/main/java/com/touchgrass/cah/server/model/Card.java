@@ -2,6 +2,6 @@ package com.touchgrass.cah.server.model;
 
 
 public interface Card {
-    String getId();
+    int getId();
     String getText();
 }

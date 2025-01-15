@@ -12,8 +12,13 @@ import java.util.ArrayList;
 public class Player {
     private String id;
     private String nickname;
-    private boolean isReady;
-    private boolean isMyTurn;
+    private boolean isReady = false;
+    private boolean isMyTurn = false;
     private int score = 0;
-    private ArrayList<WhiteCard> hand;
+    private ArrayList<WhiteCard> hand = new ArrayList<>();
+
+    public Player(String id, String nickname) {
+        this.id = id;
+        this.nickname = nickname;
+    }
 }

@@ -3,6 +3,7 @@ package com.touchgrass.cah.server.model;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 @Getter
 @Setter
@@ -11,5 +12,5 @@ import java.util.ArrayList;
 @ToString
 public class Round {
     private BlackCard currentBlackCard;
-    private ArrayList<WhiteCard> playedCards;
+    private HashMap<String, ArrayList<WhiteCard>> playedCards = new HashMap<>();
 }

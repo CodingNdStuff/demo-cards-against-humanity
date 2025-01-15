@@ -1,11 +1,13 @@
 package com.touchgrass.cah.server.model;
 
-import com.touchgrass.cah.server.service.JsonService;
+import com.touchgrass.cah.server.utils.Constants;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.UUID;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,12 +21,11 @@ public class Lobby {
     private int maxRoundNumber;
     private int currentRound;
     private Round round;
-    @Autowired
     private Deck deck;
     private HashMap<String, Player> playerList;
 
-    void Lobby(int roundDuration, int maxRoundNumber, Player host) {
-        id = UUID.randomUUID().toString();
+    public Lobby(int roundDuration, int maxRoundNumber, Player host, Deck deck) {
+        id = "11111"; // UUID.randomUUID().toString();
         status = LobbyStatus.open;
         this.roundDuration = roundDuration;
         this.maxRoundNumber = maxRoundNumber;
@@ -33,6 +34,69 @@ public class Lobby {
         playerList = new HashMap<>();
         playerList.put(host.getId(), host);
         host.setMyTurn(true);
+        this.deck = deck;
         round.setCurrentBlackCard(deck.drawBlackCard());
+    }
+
+    public void addPlayer(Player player) {
+        this.playerList.put(player.getId(), player);
+        System.out.println("Added Player " + player.getId() + " " + player.getNickname());
+    }
+
+    public void setPlayerReady(String playerId) throws CustomException {
+        Player p = playerList.get(playerId);
+        if (p == null) throw new CustomException(404, "Player not found");
+        p.setReady(true);
+        System.out.println("Set Player ready " + playerId + " " + this.playerList.get(playerId));
+    }
+
+    public boolean checkAllReady() {
+        for (Player p : this.playerList.values()) {
+            if (!p.isReady()) return false;
+
+        }
+        return true;
+    }
+
+    public void resetAllPlayerReady() {
+        for (Player p : this.playerList.values()) {
+            p.setReady(false);
+        }
+    }
+
+    public void refillHands() {
+        for (Player p : this.playerList.values()) {
+            ArrayList<WhiteCard> hand = p.getHand();
+            while (hand.size() < Constants.HAND_SIZE) {
+                hand.add(deck.drawWhiteCard());
+            }
+        }
+    }
+
+    public void playCard(@Size(min = 1, max = 32) String playerId, @NotNull @Size(min = 1) List<@NotNull Integer> cardIds) throws CustomException {
+        if (this.status != LobbyStatus.play) throw new CustomException(409, "Cannot play a card right now");
+        Player player = this.playerList.get(playerId);
+        if (player == null) throw new CustomException(404, "Player not found");
+
+        ArrayList<WhiteCard> playedCards = new ArrayList<>();
+        int found = 0;
+        ArrayList<WhiteCard> remainingCards = new ArrayList<>();
+        for (WhiteCard c : player.getHand()) {
+            if (cardIds.contains(c.getId())) {
+                playedCards.add(c);
+                found++;
+            } else
+                remainingCards.add(c);
+        }
+        if (found != cardIds.size()) throw new CustomException(404, "Player possesses no such card");
+        round.getPlayedCards().put(playerId, playedCards);
+        player.setHand(remainingCards);
+    }
+
+    public String getTurnHolder() { // todo can optimize
+        for (Player p : playerList.values()) {
+            if (p.isMyTurn()) return p.getId();
+        }
+        return null;
     }
 }
