@@ -22,7 +22,7 @@ public class FirebaseService {
     }
 
     public void publishHandData(String lobbyId, Player player) {
-        publishJsonToPath("/" + lobbyId + "/hands/" + player.getId(), player.getHand());
+        publishJsonToPath("/" + lobbyId + "/hands/" + player.getNickname(), player.getHand());
     }
 
     public void deleteLobbyData(String lobbyId) {

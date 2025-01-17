@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.touchgrass.cah.server.model.*;
-import com.touchgrass.cah.server.utils.Constants;
+import com.touchgrass.cah.server.configuration.Constants;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,7 +127,6 @@ public class LobbyService {
         votingPlayer.setMyTurn(false);
         votedPlayer.setMyTurn(true);
         votedPlayer.addScore(100);
-        votedPlayer.setReady(true);
         lobby.getRound().setWinnerNickname(votedPlayer.getNickname());
         ArrayList<String> winnerCards = new ArrayList<>();
         for(WhiteCard card : lobby.getRound().getPlayedCards().get(votedPlayer.getNickname())) { //todo verify order

@@ -1,12 +1,15 @@
 package com.touchgrass.cah.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.touchgrass.cah.server.utils.Constants;
+import com.touchgrass.cah.server.configuration.Constants;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -60,7 +63,9 @@ public class Lobby {
 
     public void resetAllPlayerReady() {
         for (Player p : this.playerList.values()) {
-            p.setReady(false);
+            if (!p.isMyTurn()) { // necessary otherwise you'd need to set this manually in a less efficient manner
+                p.setReady(false);
+            }
         }
     }
 
@@ -107,11 +112,11 @@ public class Lobby {
 
     private String getNicknameFromId(String playerId) throws CustomException {
         Player player = playerList.get(playerId);
-        if(player == null) throw new CustomException(404, "Player not found");
+        if (player == null) throw new CustomException(404, "Player not found");
         return player.getNickname();
     }
 
-    public Player playerFromNickname (String nickname){
+    public Player playerFromNickname(String nickname) {
         Optional<Player> player = playerList.values().stream().filter(p -> p.getNickname().equals(nickname)).findFirst();
         return player.orElse(null);
     }

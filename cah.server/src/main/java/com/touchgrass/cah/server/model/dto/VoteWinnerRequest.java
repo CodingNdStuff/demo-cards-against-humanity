@@ -1,6 +1,6 @@
 package com.touchgrass.cah.server.model.dto;
 
-import com.touchgrass.cah.server.utils.Constants;
+import com.touchgrass.cah.server.configuration.Constants;
 import jakarta.validation.constraints.*;
 import lombok.*;
 

@@ -1,4 +1,4 @@
-package com.touchgrass.cah.server.utils;
+package com.touchgrass.cah.server.configuration;
 
 public class Constants {
     public static final int HAND_SIZE = 2;

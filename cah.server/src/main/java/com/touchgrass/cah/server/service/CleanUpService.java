@@ -16,7 +16,7 @@ public class CleanUpService {
     private final AtomicBoolean isSchedulerRunning = new AtomicBoolean(false);
 
     public void init(CleanUpCallback cb) {
-        this.cb = cb;
+        this.cb = cb; //TODO uncomment this
     }
 
     private void startScheduler() {
