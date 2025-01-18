@@ -43,3 +43,11 @@ public class Application {
 		- no ip checks: a user can spam "create lobby" and fill the lobby number size
 		- payload is not protected, consider rsa
  */
+
+/*
+	TODO:
+		- ip checks,
+		- rate limiter, blacklist
+		- reconnect api
+		- better disconnection handling to prevent deadlocks
+ */

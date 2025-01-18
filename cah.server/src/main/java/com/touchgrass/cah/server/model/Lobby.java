@@ -27,18 +27,19 @@ public class Lobby {
     private Deck deck;
     private HashMap<String, Player> playerList;
 
-    public Lobby(int roundDuration, int maxRoundNumber, Player host, Deck deck) {
-        id = "11111"; // UUID.randomUUID().toString();
-        status = LobbyStatus.open;
+    public Lobby(String id, int roundDuration, int maxRoundNumber, Player host, Deck deck) {
+        this.id = id;
+        this.status = LobbyStatus.open;
         this.roundDuration = roundDuration;
         this.maxRoundNumber = maxRoundNumber;
         this.currentRound = 1;
-        round = new Round();
-        playerList = new HashMap<>();
-        playerList.put(host.getId(), host);
+        this.round = new Round();
+        this.round.setCurrentBlackCard(deck.drawBlackCard());
+        this.playerList = new HashMap<>();
+        this.playerList.put(host.getId(), host);
         host.setMyTurn(true);
         this.deck = deck;
-        round.setCurrentBlackCard(deck.drawBlackCard());
+
     }
 
     public void addPlayer(Player player) {

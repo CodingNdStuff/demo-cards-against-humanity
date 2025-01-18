@@ -34,7 +34,7 @@ public class LobbyService {
     public String createLobby(String playerId, String nickname, int roundDuration, int maxRoundNumber) throws CustomException {
         System.out.println("Creating lobby");
         if (lobbies.size() >= Constants.MAX_LOBBIES) throw new CustomException(500, "Service is too busy, retry later");
-        Lobby lobby = new Lobby(roundDuration, maxRoundNumber, new Player(playerId, nickname), new Deck(jsonService.getAllBlackCards(), jsonService.getAlWhiteCards()));
+        Lobby lobby = new Lobby(generateUniqueId(), roundDuration, maxRoundNumber, new Player(playerId, nickname), new Deck(jsonService.getAllBlackCards(), jsonService.getAlWhiteCards()));
         lobbies.put(lobby.getId(), lobby);
         System.out.println("Lobby created " + lobby.getId() + ", " + lobbies.size() + " lobbies active");
         firebaseService.publishLobbyData(lobby);
@@ -251,6 +251,22 @@ public class LobbyService {
             throw new CustomException(404, "Lobby not found.");
         }
         return lobby;
+    }
+
+    public String generateUniqueId() {
+        String newId;
+        int maxRetries = 100;  // Limit retries to prevent infinite loops
+        int retries = 0;
+
+        do {
+            newId = UUID.randomUUID().toString().substring(0, Constants.LOBBY_ID_LENGTH);
+            retries++;
+            if (retries >= maxRetries) {
+                throw new IllegalStateException("Unable to generate a unique ID after " + maxRetries + " attempts.");
+            }
+        } while (lobbies.containsKey(newId));
+
+        return newId;
     }
 
     //endregion
