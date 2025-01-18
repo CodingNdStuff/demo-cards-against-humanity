@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1047072019183",
+    "firebase_url": "https://cards-against-humanity-demo-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "cards-against-humanity-demo",
+    "storage_bucket": "cards-against-humanity-demo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1047072019183:android:14a087b9a8aa4ad27c411a",
+        "android_client_info": {
+          "package_name": "com.touchgrass.against.humanity"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSPukdO4MJIcMdA5UrWRybhOqUu1z1hFs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

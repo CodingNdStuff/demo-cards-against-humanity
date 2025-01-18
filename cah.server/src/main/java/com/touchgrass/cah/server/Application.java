@@ -49,5 +49,5 @@ public class Application {
 		- ip checks,
 		- rate limiter, blacklist
 		- reconnect api
-		- better disconnection handling to prevent deadlocks
+		- better disconnection handling to prevent deadlocks (or votekick)
  */
