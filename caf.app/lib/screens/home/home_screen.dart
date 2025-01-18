@@ -67,8 +67,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     counterText: "",
                   ),
                   controller: _nicknameController,
-                  onChanged: (value) =>
-                      null // user.changeNickname(value.trim()),
+                  onChanged: (value) {} // user.changeNickname(value.trim()),
                   ),
             ),
             const SizedBox(

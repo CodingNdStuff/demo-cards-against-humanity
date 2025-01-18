@@ -25,15 +25,19 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     if (!_isInitialized) {
-      final vm = Provider.of<LobbyViewModel>(context);
-      try {
-        vm.id;
-      } catch (e) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          HomeScreen.routeName,
-          (_) => true,
-        );
+      final vm = Provider.of<LobbyViewModel>(context, listen: false);
+      if (vm.id.isEmpty) {
+        NavigatorState n = Navigator.of(context);
+        vm.attemptLobbyRecovery().then((isRestorePossible) {
+          if (!isRestorePossible) {
+            n.pushNamedAndRemoveUntil(
+              HomeScreen.routeName,
+              (_) => true,
+            );
+          }
+        });
       }
       _isInitialized = true;
     }

@@ -1,6 +1,4 @@
-import 'package:cards_against_humanity/viewmodel/lobby_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class ViewControllerScope extends StatefulWidget {
   final Widget child;

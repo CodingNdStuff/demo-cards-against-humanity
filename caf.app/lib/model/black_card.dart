@@ -1,5 +1,4 @@
 import 'package:cards_against_humanity/model/dto/black_card_dto.dart';
-import 'package:cards_against_humanity/model/white_card.dart';
 
 class BlackCard {
   final int id;

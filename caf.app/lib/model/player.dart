@@ -1,6 +1,4 @@
-import 'package:cards_against_humanity/model/dto/lobby_dto.dart';
 import 'package:cards_against_humanity/model/dto/player_dto.dart';
-import 'package:flutter/foundation.dart';
 
 class Player {
   final String id;

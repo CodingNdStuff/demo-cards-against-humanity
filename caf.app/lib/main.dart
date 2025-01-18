@@ -1,23 +1,22 @@
-import 'dart:math';
-
+import 'package:cards_against_humanity/data/implementation/local_data_source.dart';
+import 'package:cards_against_humanity/data/local_repository.dart';
 import 'package:cards_against_humanity/themes/general_themes.dart';
-import 'package:cards_against_humanity/helpers/api_service.dart';
-import 'package:cards_against_humanity/helpers/mqtt_helper.dart';
-import 'package:cards_against_humanity/model/player.dart';
-import 'package:cards_against_humanity/model/user.dart';
 import 'package:cards_against_humanity/screens/home/home_screen.dart';
 import 'package:cards_against_humanity/screens/inGame/game_screen.dart';
 import 'package:cards_against_humanity/screens/inGame/post_game_screen.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_creation_screen.dart';
 import 'package:cards_against_humanity/screens/lobby/lobby_entering_screen.dart';
 import 'package:cards_against_humanity/viewmodel/lobby_view_model.dart';
-import 'package:cards_against_humanity/widgets/lobby_scope.dart';
 import 'package:cards_against_humanity/widgets/view_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+
+final getIt = GetIt.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +26,10 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await Hive.initFlutter();
+  getIt.registerSingleton<LocalRepository>(LocalDataSource(),
+      signalsReady: true);
+  await getIt<LocalRepository>().init();
   runApp(const MyApp());
 }
 
